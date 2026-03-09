@@ -2,10 +2,17 @@
   "name": "my-v0-project",
   "version": "0.1.0",
   "private": true,
+  "workspaces": [
+    "officer-app",
+    "public-app"
+  ],
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "dev:officer": "npm --workspace=officer-app run dev",
+    "build:officer": "npm --workspace=officer-app run build",
+    "start:officer": "npm --workspace=officer-app run start",
+    "dev:public": "npm --workspace=public-app run dev",
+    "build:public": "npm --workspace=public-app run build",
+    "start:public": "npm --workspace=public-app run start",
     "lint": "eslint .",
     "seed:officer": "node scripts/seed_officer.js"
   },
