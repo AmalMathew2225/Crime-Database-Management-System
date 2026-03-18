@@ -49,7 +49,7 @@ export async function PATCH(request: Request) {
       .eq("officer_id", payload.id);
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json({ notification: data?.[0] });
+    return NextResponse.json({ notification: data ? data[0] : null });
   } catch (err) {
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }

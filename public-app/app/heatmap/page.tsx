@@ -1,11 +1,20 @@
 import { use } from "react";
+import { mockPublicFirs } from "../../lib/mock-data";
 
 async function getFirs() {
-  const base = process.env.NEXT_PUBLIC_OFFICER_URL || '';
-  const res = await fetch(`${base}/api/firs`, { cache: 'no-store' });
-  if (!res.ok) return [];
-  const json = await res.json();
-  return json.firs || [];
+  try {
+    const base = process.env.NEXT_PUBLIC_OFFICER_URL || '';
+    if (base) {
+      const res = await fetch(`${base}/api/firs`, { cache: 'no-store' });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.firs && json.firs.length > 0) return json.firs;
+      }
+    }
+  } catch {
+    // fall through to mock data
+  }
+  return mockPublicFirs;
 }
 
 export default async function HeatmapPage() {

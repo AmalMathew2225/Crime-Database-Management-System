@@ -118,6 +118,7 @@ export async function POST(request: Request) {
       crime_type_id,
       investigating_officer_id: officer_id,
       location,
+      location_ml: location,
       description,
       complainant_name,
       status: "Registered",

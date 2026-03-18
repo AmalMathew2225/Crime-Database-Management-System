@@ -4,26 +4,40 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, UserCircle, Loader2 } from "lucide-react";
+import { Search, UserCircle, Loader2, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { Person } from "@/lib/types";
-import { searchPersons } from "@/lib/mock-data";
 
 export function PersonSearchModal() {
     const [open, setOpen] = useState(false);
     const [query, setQuery] = useState("");
     const [results, setResults] = useState<Person[]>([]);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    const handleSearch = () => {
+    const handleSearch = async () => {
         if (!query.trim()) return;
+        
         setLoading(true);
-        // Simulate network delay
-        setTimeout(() => {
-            const searchResults = searchPersons(query);
-            setResults(searchResults);
+        setError(null);
+        setResults([]);
+
+        try {
+            const response = await fetch(`/api/person?query=${encodeURIComponent(query.trim())}`);
+            
+            if (!response.ok) {
+                const data = await response.json().catch(() => ({}));
+                throw new Error(data.error || "Failed to search persons");
+            }
+
+            const data = await response.json();
+            setResults(data.persons || []);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "An error occurred");
+            setResults([]);
+        } finally {
             setLoading(false);
-        }, 500);
+        }
     };
 
     return (
@@ -51,6 +65,13 @@ export function PersonSearchModal() {
                         </Button>
                     </div>
 
+                    {error && (
+                        <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
+                            <AlertCircle className="h-4 w-4" />
+                            <span>{error}</span>
+                        </div>
+                    )}
+
                     <div className="max-h-[300px] overflow-y-auto space-y-2">
                         {results.length > 0 ? (
                             results.map((person) => (
@@ -69,7 +90,7 @@ export function PersonSearchModal() {
                                     </div>
                                 </Link>
                             ))
-                        ) : query && !loading ? (
+                        ) : query && !loading && !error ? (
                             <p className="text-center text-sm text-muted-foreground py-4">No persons found.</p>
                         ) : null}
                     </div>

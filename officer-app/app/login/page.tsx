@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ShieldCheck, BadgeCheck, ArrowRight, AlertCircle } from "lucide-react";
@@ -10,24 +9,39 @@ export default function OfficerLoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
-    const trimmed = badge.trim();
+    const trimmed = badge.trim().toUpperCase();
     if (!trimmed) {
       setError("Please enter your Identity Badge Number.");
       return;
     }
-
-    if (!/^[A-Z0-9]{4,12}$/i.test(trimmed)) {
+    if (!/^[A-Z0-9]{4,12}$/.test(trimmed)) {
       setError("Invalid badge number. Must be 4–12 alphanumeric characters.");
       return;
     }
 
     setLoading(true);
-    localStorage.setItem("officer_badge", trimmed.toUpperCase());
-    router.replace("/dashboard");
+    try {
+      // Verify badge against the API — rejects unknown badges
+      const res = await fetch("/api/auth/me", {
+        headers: { "x-officer-badge": trimmed },
+      });
+
+      if (!res.ok) {
+        setError("Badge not recognised. Please check your badge number or contact your station administrator.");
+        return;
+      }
+
+      localStorage.setItem("officer_badge", trimmed);
+      router.replace("/dashboard");
+    } catch {
+      setError("Unable to connect to the server. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -45,9 +59,7 @@ export default function OfficerLoginPage() {
             <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-600 shadow-2xl shadow-blue-600/40">
               <ShieldCheck className="h-9 w-9 text-white" />
             </div>
-            <h1 className="text-2xl font-extrabold text-white tracking-tight">
-              Kerala Police
-            </h1>
+            <h1 className="text-2xl font-extrabold text-white tracking-tight">Kerala Police</h1>
             <p className="mt-1 text-sm text-blue-300">Officer Access — Crime Management System</p>
           </div>
 

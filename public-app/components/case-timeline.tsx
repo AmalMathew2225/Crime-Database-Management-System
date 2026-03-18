@@ -34,7 +34,7 @@ export function CaseTimeline({ followups }: CaseTimelineProps) {
   return (
     <Card>
       <CardHeader className="border-b bg-muted/30">
-        <CardTitle className="flex itemscenter gap-2">
+        <CardTitle className="flex items-center gap-2">
           <Clock className="h-5 w-5 text-primary" />
           Case Timeline
         </CardTitle>

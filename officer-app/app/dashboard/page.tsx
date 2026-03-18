@@ -68,7 +68,7 @@ export default function DashboardPage() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [filterId, filterCrime, filterStatus, filterLocation, filterFrom, filterTo]);
 
   async function fetchFirs() {
     const params = new URLSearchParams();

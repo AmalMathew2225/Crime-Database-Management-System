@@ -6,7 +6,7 @@ interface CrimeMapProps {
 
 export function CrimeMap({ location }: CrimeMapProps) {
   const encoded = encodeURIComponent(location);
-  const src = `https://www.google.com/maps?q=${encoded}&output=embed`;
+  const src = `https://nominatim.openstreetmap.org/ui/search.html?q=${encoded}`;
   return (
     <div className="w-full h-64 rounded overflow-hidden">
       <iframe

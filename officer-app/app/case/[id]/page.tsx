@@ -24,7 +24,7 @@ import { StatusUpdater } from "@/components/status-updater";
 
 // fetch real FIR from API
 async function getFIR(id: string) {
-    const base = process.env.OFFICER_INTERNAL_URL || "http://localhost:3000";
+    const base = process.env.OFFICER_INTERNAL_URL || "http://localhost:3001";
     const res = await fetch(`${base}/api/firs/${id}`, { cache: "no-store" });
     if (!res.ok) return null;
     const json = await res.json();

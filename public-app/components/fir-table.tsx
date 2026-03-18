@@ -32,8 +32,9 @@ interface FIR {
   station_id: string;
   crime_type_id: string;
   location: string;
+  location_ml?: string;
   status: string;
-  police_stations?: { id: string; name: string; district: string };
+  police_stations?: { id: string; name: string; name_ml?: string; district: string };
   crime_types?: { id: string; name: string; ipc_section: string };
 }
 

@@ -1,98 +1,129 @@
 import { FIRTable } from "../components/fir-table";
-import { mockPublicFirs } from "../lib/mock-data";
+import { PublicPortalShell } from "../components/public-portal-shell";
+import { FileWarning, AlertCircle, CheckCircle, Clock } from "lucide-react";
 
-async function getPublicFirs() {
-  // Try fetching from the officer-app API first; fall back to local mock data
+export const revalidate = 60; // Revalidate every minute
+
+async function getFirs() {
   try {
     const base = process.env.NEXT_PUBLIC_OFFICER_URL || '';
     if (base) {
-      const res = await fetch(`${base}/api/firs`, { cache: 'no-store' });
+      const res = await fetch(`${base}/api/firs`, { next: { revalidate: 60 } });
       if (res.ok) {
         const json = await res.json();
-        if (json.firs?.length) return json.firs;
+        if (json.firs && json.firs.length > 0) return json.firs;
       }
     }
-  } catch {
-    // fall through to mock data
+  } catch (err) {
+    console.error("Failed to fetch FIRs from officer app:", err);
   }
+  // Fallback if API fails or isn't configured
+  const { mockPublicFirs } = await import("../lib/mock-data");
   return mockPublicFirs;
 }
 
+export default async function Home() {
+  const firs = await getFirs();
 
-export default async function HomePage() {
-  const firs = await getPublicFirs();
-  const stations = firs.map((f: any) => f.police_stations).filter(Boolean);
-  const crimeTypes = firs.map((f: any) => f.crime_types).filter(Boolean);
+  // Extract unique stations and crime types for the filter dropdowns
+  const stationsMap = new Map();
+  const crimeTypesMap = new Map();
+  
+  firs.forEach((f: any) => {
+    if (f.police_stations) {
+      stationsMap.set(f.police_stations.id, f.police_stations);
+    }
+    if (f.crime_types) {
+      crimeTypesMap.set(f.crime_types.id, f.crime_types);
+    }
+  });
 
-  // compute simple stats
-  const closed = firs.filter((f: any) => f.status === 'Closed').length;
-  const active = firs.length - closed;
-  const avgResolution = closed
-    ? closed
-      ? (
-        firs
-          .filter((f: any) => f.status === 'Closed')
-          .reduce((sum: number, f: any) => {
-            const filed = new Date(f.date_filed).getTime();
-            const closedAt = new Date(f.updated_at || f.date_filed).getTime();
-            return sum + (closedAt - filed);
-          }, 0) /
-        closed /
-        (1000 * 60 * 60 * 24)
-      ).toFixed(1)
-      : 0
-    : 0;
+  const stations = Array.from(stationsMap.values());
+  const crimeTypes = Array.from(crimeTypesMap.values());
+
+  // Calculate high-level stats
+  const totalCases = firs.length;
+  const activeCases = firs.filter((f: any) => f.status !== "Closed").length;
+  const closedCases = firs.filter((f: any) => f.status === "Closed").length;
+  const recentCases = firs.filter((f: any) => {
+    const filed = new Date(f.date_filed);
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    return filed >= thirtyDaysAgo;
+  }).length;
 
   return (
-    <div className="space-y-10">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden rounded-3xl bg-blue-700 py-16 px-6 text-white shadow-2xl mb-12">
-        <div className="absolute top-0 right-0 -mt-20 -mr-20 h-64 w-64 rounded-full bg-blue-600 opacity-20 blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 -mb-20 -ml-20 h-64 w-64 rounded-full bg-blue-400 opacity-20 blur-3xl"></div>
+    <PublicPortalShell>
+      <div className="mb-8">
+        <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+          Public Information Portal
+        </h2>
+        <p className="mt-4 text-lg text-slate-600 max-w-3xl">
+          Access transparent, up-to-date information on registered cases across the
+          district. Use the filters below to find specific incidents or track case
+          statuses.
+        </p>
+      </div>
 
-        <div className="relative z-10 max-w-2xl">
-          <h2 className="text-4xl font-extrabold tracking-tight sm:text-5xl mb-4">
-            Crime Transparency <span className="text-blue-200 underline decoration-blue-300/30">Portal</span>
-          </h2>
-          <p className="text-lg text-blue-100 mb-8 max-w-xl">
-            Providing real-time access to crime statistics and FIR reports for the citizens of Kerala. Stay informed and help us build a safer community.
-          </p>
-          <div className="flex flex-wrap gap-4">
-            <a href="#recent-firs" className="rounded-full bg-white px-6 py-3 text-sm font-bold text-blue-700 shadow-lg transition-transform hover:scale-105 active:scale-95">
-              Browse FIRs
-            </a>
-            <div className="flex items-center gap-1 text-sm text-blue-100">
-              <span className="inline-block h-2 w-2 rounded-full bg-green-400 animate-pulse"></span>
-              Live Data from Cyber Dome
+      {/* Stats Overview */}
+      <div className="mb-10 grid gap-4 grid-cols-2 lg:grid-cols-4">
+        {/* Total Cases */}
+        <div className="relative overflow-hidden rounded-2xl bg-white p-6 shadow-sm border border-slate-200/60 ring-1 ring-slate-900/5">
+          <div className="flex items-center gap-4">
+            <div className="rounded-xl p-2.5 bg-blue-50 text-blue-600">
+              <FileWarning className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-slate-500">Total Cases</p>
+              <p className="text-3xl font-bold text-slate-900">{totalCases}</p>
             </div>
           </div>
         </div>
-      </section>
 
-      {/* Stats Section with Premium Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {[
-          { label: "Total FIRs", value: firs.length, icon: "M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10", color: "blue" },
-          { label: "Active Cases", value: active, icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z", color: "amber" },
-          { label: "Closed Cases", value: closed, icon: "M5 13l4 4L19 7", color: "green" },
-          { label: "Avg Resolution", value: `${avgResolution} Days`, icon: "M13 10V3L4 14h7v7l9-11h-7z", color: "indigo" }
-        ].map((stat, i) => (
-          <div key={i} className="group relative overflow-hidden rounded-2xl bg-white p-6 shadow-md transition-all hover:shadow-xl hover:-translate-y-1">
-            <div className={`absolute top-0 right-0 h-24 w-24 -mt-8 -mr-8 rounded-full bg-${stat.color}-50 transition-colors group-hover:bg-${stat.color}-100 opacity-50`}></div>
-            <div className="relative z-10">
-              <div className={`p-2 rounded-lg bg-${stat.color}-100 text-${stat.color}-600 inline-block mb-4`}>
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={stat.icon} /></svg>
-              </div>
-              <p className="text-sm font-medium text-slate-500 uppercase tracking-wider">{stat.label}</p>
-              <p className="text-3xl font-extrabold text-slate-900 mt-1">{stat.value}</p>
+        {/* Active Cases */}
+        <div className="relative overflow-hidden rounded-2xl bg-white p-6 shadow-sm border border-slate-200/60 ring-1 ring-slate-900/5">
+          <div className="flex items-center gap-4">
+            <div className="rounded-xl p-2.5 bg-amber-50 text-amber-600">
+              <AlertCircle className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-slate-500">Active Cases</p>
+              <p className="text-3xl font-bold text-slate-900">{activeCases}</p>
             </div>
           </div>
-        ))}
+        </div>
+
+        {/* Closed Cases */}
+        <div className="relative overflow-hidden rounded-2xl bg-white p-6 shadow-sm border border-slate-200/60 ring-1 ring-slate-900/5">
+          <div className="flex items-center gap-4">
+            <div className="rounded-xl p-2.5 bg-emerald-50 text-emerald-600">
+              <CheckCircle className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-slate-500">Closed Cases</p>
+              <p className="text-3xl font-bold text-slate-900">{closedCases}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Cases */}
+        <div className="relative overflow-hidden rounded-2xl bg-white p-6 shadow-sm border border-slate-200/60 ring-1 ring-slate-900/5">
+          <div className="flex items-center gap-4">
+            <div className="rounded-xl p-2.5 bg-purple-50 text-purple-600">
+              <Clock className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-slate-500">Recent (30d)</p>
+              <p className="text-3xl font-bold text-slate-900">{recentCases}</p>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="pt-8">
+      {/* Main Data Table */}
+      <div className="rounded-2xl bg-white shadow-xl shadow-slate-200/20 border border-slate-200/60 overflow-hidden">
         <FIRTable firs={firs} stations={stations} crimeTypes={crimeTypes} />
       </div>
-    </div>
+    </PublicPortalShell>
   );
 }

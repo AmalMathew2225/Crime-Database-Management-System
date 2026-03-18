@@ -1,27 +1,52 @@
-import { getPersonWithCases } from "@/lib/mock-data";
 import { Navbar } from "@/components/navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, MapPin, Phone, User, Calendar } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { notFound } from "next/navigation";
+
+async function getPersonData(id: string) {
+    try {
+        // Construct API URL for server-side fetch
+        // Use environment variable if available, otherwise default to localhost
+        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
+                       process.env.VERCEL_URL 
+                       ? `https://${process.env.VERCEL_URL}`
+                       : 'http://localhost:3000';
+        
+        const response = await fetch(`${baseUrl}/api/person/${id}`, {
+            cache: 'no-store', // Always fetch fresh data
+        });
+
+        if (!response.ok) {
+            if (response.status === 404) {
+                return null;
+            }
+            throw new Error(`API error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data.person;
+    } catch (error) {
+        console.error('Error fetching person from API:', error);
+        // Fallback to direct function call if API fails (useful during development)
+        try {
+            const { getPersonWithCases } = await import('@/lib/mock-data');
+            return getPersonWithCases(id);
+        } catch (fallbackError) {
+            console.error('Fallback also failed:', fallbackError);
+            return null;
+        }
+    }
+}
 
 export default async function PersonDetailsPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
-    const personData = getPersonWithCases(id);
+    const personData = await getPersonData(id);
 
     if (!personData) {
-        return (
-            <div className="min-h-screen bg-background">
-                <Navbar />
-                <div className="container mx-auto py-8 text-center">
-                    <h1 className="text-2xl font-bold text-muted-foreground">Person not found</h1>
-                    <Link href="/">
-                        <Button variant="link" className="mt-4">Return Home</Button>
-                    </Link>
-                </div>
-            </div>
-        );
+        notFound();
     }
 
     return (

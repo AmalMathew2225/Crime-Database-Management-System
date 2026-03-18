@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { AlertTriangle } from "lucide-react";
@@ -21,11 +20,16 @@ interface Props {
 type Accused = { name?: string; address?: string; description?: string };
 type PropertyItem = { item_name?: string; quantity?: number; estimated_value?: number };
 
+// Returns null instead of "" for optional string fields
+function optionalStr(fd: FormData, key: string): string | null {
+  const val = String(fd.get(key) || "").trim();
+  return val === "" ? null : val;
+}
+
 export function FIRForm({ onSuccess }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-
   const [accused, setAccused] = useState<Accused[]>([]);
   const [properties, setProperties] = useState<PropertyItem[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -40,7 +44,7 @@ export function FIRForm({ onSuccess }: Props) {
       case "location":
         return !value || String(value).trim() === "" ? "Location is required" : undefined;
       case "crime_type_id":
-        return !value || String(value).trim() === "" ? "Crime type is required (use ID)" : undefined;
+        return !value || String(value).trim() === "" ? "Crime type is required" : undefined;
       case "phone":
         if (!value) return undefined;
         return String(value).length < 6 ? "Enter a valid phone number" : undefined;
@@ -49,26 +53,14 @@ export function FIRForm({ onSuccess }: Props) {
     }
   }
 
-  function addAccused() {
-    setAccused((s) => [...s, {}]);
-  }
-
-  function removeAccused(i: number) {
-    setAccused((s) => s.filter((_, idx) => idx !== i));
-  }
-
+  function addAccused() { setAccused((s) => [...s, {}]); }
+  function removeAccused(i: number) { setAccused((s) => s.filter((_, idx) => idx !== i)); }
   function updateAccused(i: number, patch: Partial<Accused>) {
     setAccused((s) => s.map((it, idx) => (idx === i ? { ...it, ...patch } : it)));
   }
 
-  function addProperty() {
-    setProperties((s) => [...s, { quantity: 1 }]);
-  }
-
-  function removeProperty(i: number) {
-    setProperties((s) => s.filter((_, idx) => idx !== i));
-  }
-
+  function addProperty() { setProperties((s) => [...s, { quantity: 1 }]); }
+  function removeProperty(i: number) { setProperties((s) => s.filter((_, idx) => idx !== i)); }
   function updateProperty(i: number, patch: Partial<PropertyItem>) {
     setProperties((s) => s.map((it, idx) => (idx === i ? { ...it, ...patch } : it)));
   }
@@ -77,38 +69,40 @@ export function FIRForm({ onSuccess }: Props) {
     e.preventDefault();
     setError(null);
     setSuccess(null);
+
     const form = e.target as HTMLFormElement;
     const fd = new FormData(form);
 
     const payload: any = {
+      // Required fields — keep as strings
       complainant_name: String(fd.get("complainant_name") || "").trim(),
-      guardian_name: String(fd.get("guardian_name") || "").trim(),
-      gender: String(fd.get("gender") || "").trim(),
-      age: fd.get("age") ? Number(fd.get("age")) : null,
-      dob: fd.get("dob") || null,
-      address: String(fd.get("address") || "").trim(),
-      phone: String(fd.get("phone") || "").trim(),
-      date_of_occurrence: fd.get("date_of_occurrence") || null,
-      time_of_occurrence: fd.get("time_of_occurrence") || null,
       location: String(fd.get("location") || "").trim(),
       crime_type_id: String(fd.get("crime_type_id") || "").trim(),
-      ipc_sections: String(fd.get("ipc_sections") || "").trim(),
       description: String(fd.get("description") || "").trim(),
+      // Optional fields — coerce empty strings to null for clean API data
+      guardian_name: optionalStr(fd, "guardian_name"),
+      gender: optionalStr(fd, "gender"),
+      age: fd.get("age") ? Number(fd.get("age")) : null,
+      dob: optionalStr(fd, "dob"),
+      address: optionalStr(fd, "address"),
+      phone: optionalStr(fd, "phone"),
+      date_of_occurrence: optionalStr(fd, "date_of_occurrence"),
+      time_of_occurrence: optionalStr(fd, "time_of_occurrence"),
+      ipc_sections: optionalStr(fd, "ipc_sections"),
       accused: accused.filter((a) => a.name || a.address || a.description),
       property_items: properties.filter((p) => p.item_name),
     };
 
-    // Validate all fields
+    // Validate required fields
     const newErrors: Record<string, string> = {};
     if (!payload.complainant_name) newErrors.complainant_name = "Complainant name is required";
     if (!payload.description) newErrors.description = "Description is required";
     if (!payload.location) newErrors.location = "Location is required";
-    if (!payload.crime_type_id) newErrors.crime_type_id = "Crime type is required (use ID)";
+    if (!payload.crime_type_id) newErrors.crime_type_id = "Crime type is required";
     if (payload.phone && String(payload.phone).length < 6) newErrors.phone = "Enter a valid phone number";
 
     setErrors(newErrors);
     setTouched({ complainant_name: true, description: true, location: true, crime_type_id: true, phone: true });
-
     if (Object.keys(newErrors).length > 0) return setError("Please fix the highlighted fields");
 
     setLoading(true);
@@ -123,8 +117,8 @@ export function FIRForm({ onSuccess }: Props) {
         body: JSON.stringify(payload),
       });
       const json = await res.json();
+
       if (!res.ok) {
-        // If API returned structured field errors, apply them to the form
         if (res.status === 400 && json?.fieldErrors) {
           const fe: Record<string, string[]> = json.fieldErrors;
           const mapped: Record<string, string> = {};
@@ -133,14 +127,12 @@ export function FIRForm({ onSuccess }: Props) {
             else if (typeof v === "string") mapped[k] = v;
           });
           setErrors((prev) => ({ ...prev, ...mapped }));
-          // mark those fields as touched so inline errors show
           const touchedMap: Record<string, boolean> = {};
           Object.keys(mapped).forEach((k) => (touchedMap[k] = true));
           setTouched((t) => ({ ...t, ...touchedMap }));
           setError("Please fix the highlighted fields");
           return;
         }
-
         throw new Error(json?.error || "Failed to create FIR");
       }
 
@@ -170,29 +162,21 @@ export function FIRForm({ onSuccess }: Props) {
             name="complainant_name"
             required
             aria-invalid={!!errors.complainant_name}
-            className={cn(
-              "mt-1 block w-full pr-8",
-              errors.complainant_name && "border-red-600 ring-1 ring-red-200"
-            )}
+            className={cn("mt-1 block w-full pr-8", errors.complainant_name && "border-red-600 ring-1 ring-red-200")}
             onBlur={() => setTouched((t) => ({ ...t, complainant_name: true }))}
             onChange={(e) => {
               const val = e.target.value;
               setErrors((prev) => {
                 const copy = { ...prev };
                 const err = validateField("complainant_name", val);
-                if (err) copy.complainant_name = err;
-                else delete copy.complainant_name;
+                if (err) copy.complainant_name = err; else delete copy.complainant_name;
                 return copy;
               });
             }}
           />
-          {errors.complainant_name && (
-            <AlertTriangle className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-red-600" />
-          )}
+          {errors.complainant_name && <AlertTriangle className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-red-600" />}
         </div>
-        {touched.complainant_name && errors.complainant_name && (
-          <p className="text-xs text-red-600 mt-1">{errors.complainant_name}</p>
-        )}
+        {touched.complainant_name && errors.complainant_name && <p className="text-xs text-red-600 mt-1">{errors.complainant_name}</p>}
       </div>
 
       <div>
@@ -231,18 +215,14 @@ export function FIRForm({ onSuccess }: Props) {
             name="phone"
             type="tel"
             aria-invalid={!!errors.phone}
-            className={cn(
-              "mt-1 block w-full pr-8",
-              errors.phone && "border-red-600 ring-1 ring-red-200"
-            )}
+            className={cn("mt-1 block w-full pr-8", errors.phone && "border-red-600 ring-1 ring-red-200")}
             onBlur={() => setTouched((t) => ({ ...t, phone: true }))}
             onChange={(e) => {
               const val = e.target.value;
               setErrors((prev) => {
                 const copy = { ...prev };
                 const err = validateField("phone", val);
-                if (err) copy.phone = err;
-                else delete copy.phone;
+                if (err) copy.phone = err; else delete copy.phone;
                 return copy;
               });
             }}
@@ -272,18 +252,14 @@ export function FIRForm({ onSuccess }: Props) {
             name="location"
             required
             aria-invalid={!!errors.location}
-            className={cn(
-              "mt-1 block w-full pr-8",
-              errors.location && "border-red-600 ring-1 ring-red-200"
-            )}
+            className={cn("mt-1 block w-full pr-8", errors.location && "border-red-600 ring-1 ring-red-200")}
             onBlur={() => setTouched((t) => ({ ...t, location: true }))}
             onChange={(e) => {
               const val = e.target.value;
               setErrors((prev) => {
                 const copy = { ...prev };
                 const err = validateField("location", val);
-                if (err) copy.location = err;
-                else delete copy.location;
+                if (err) copy.location = err; else delete copy.location;
                 return copy;
               });
             }}
@@ -301,18 +277,14 @@ export function FIRForm({ onSuccess }: Props) {
             required
             aria-invalid={!!errors.crime_type_id}
             defaultValue=""
-            className={cn(
-              "mt-1 block w-full",
-              errors.crime_type_id && "border-red-600 ring-1 ring-red-200"
-            )}
+            className={cn("mt-1 block w-full", errors.crime_type_id && "border-red-600 ring-1 ring-red-200")}
             onBlur={() => setTouched((t) => ({ ...t, crime_type_id: true }))}
             onChange={(e) => {
               const val = e.target.value;
               setErrors((prev) => {
                 const copy = { ...prev };
                 const err = validateField("crime_type_id", val);
-                if (err) copy.crime_type_id = err;
-                else delete copy.crime_type_id;
+                if (err) copy.crime_type_id = err; else delete copy.crime_type_id;
                 return copy;
               });
             }}
@@ -339,18 +311,14 @@ export function FIRForm({ onSuccess }: Props) {
             name="description"
             required
             aria-invalid={!!errors.description}
-            className={cn(
-              "mt-1 block w-full pr-8",
-              errors.description && "border-red-600 ring-1 ring-red-200"
-            )}
+            className={cn("mt-1 block w-full pr-8", errors.description && "border-red-600 ring-1 ring-red-200")}
             onBlur={() => setTouched((t) => ({ ...t, description: true }))}
             onChange={(e) => {
               const val = e.target.value;
               setErrors((prev) => {
                 const copy = { ...prev };
                 const err = validateField("description", val);
-                if (err) copy.description = err;
-                else delete copy.description;
+                if (err) copy.description = err; else delete copy.description;
                 return copy;
               });
             }}

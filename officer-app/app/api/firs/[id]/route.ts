@@ -3,12 +3,19 @@ import { mockDashboardData } from "@/lib/mock-data";
 import { runtimeFirs } from "@/lib/fir-store";
 import { z } from "zod";
 
-// Find a FIR by id from runtime store first, then mock data
+// Find a FIR by id — runtime store shadows mock data (runtime entries take priority)
 function findFir(id: string) {
-  return runtimeFirs.find((f) => f.id === id) ?? mockDashboardData.firs.find((f) => f.id === id) ?? null;
+  return (
+    runtimeFirs.find((f) => f.id === id) ??
+    mockDashboardData.firs.find((f) => f.id === id) ??
+    null
+  );
 }
 
-export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const { id } = await params;
     const fir = findFir(id);
@@ -19,7 +26,10 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   }
 }
 
-export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const { id } = await params;
     const body = await request.json();
@@ -31,9 +41,11 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     });
 
     const parsed = updateSchema.safeParse(body);
-    if (!parsed.success) return NextResponse.json({ error: "Invalid data" }, { status: 400 });
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Invalid data" }, { status: 400 });
+    }
 
-    // Try to update in runtimeFirs first
+    // Case 1: FIR is already in runtimeFirs — update in place
     const runtimeIdx = runtimeFirs.findIndex((f) => f.id === id);
     if (runtimeIdx !== -1) {
       runtimeFirs[runtimeIdx] = {
@@ -44,23 +56,35 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       return NextResponse.json({ fir: runtimeFirs[runtimeIdx] });
     }
 
-    // For mock FIRs, find and update in-place by pushing a mutated copy to runtimeFirs
+    // Case 2: FIR is a mock entry — promote to runtimeFirs with updates applied
+    // Note: this update only persists for the lifetime of the server process.
+    // On server restart, mock FIRs revert to their original values.
     const mockFir = mockDashboardData.firs.find((f) => f.id === id);
-    if (!mockFir) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    if (!mockFir) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
 
     const updated = {
       ...mockFir,
       ...parsed.data,
       updated_at: new Date().toISOString(),
-      // keep resolved relations
+      // Preserve resolved relations
       police_stations: mockFir.police_stations,
       crime_types: mockFir.crime_types,
       officers: mockFir.officers,
     };
-    // Store the updated version in runtimeFirs so GET picks it up
+
+    // Promote to runtimeFirs so subsequent GETs return the updated version
+    // (runtimeFirs is checked before mockDashboardData in findFir)
     runtimeFirs.unshift(updated);
-    // Remove the original mock entry from future results by filtering it out via the runtime store shadowing
-    return NextResponse.json({ fir: updated });
+
+    return NextResponse.json({
+      fir: updated,
+      _warning:
+        process.env.NODE_ENV !== "production"
+          ? "This update is stored in memory only and will be lost on server restart. Connect Supabase for persistent storage."
+          : undefined,
+    });
   } catch (err) {
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }

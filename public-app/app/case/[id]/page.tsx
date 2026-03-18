@@ -1,23 +1,23 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
-import { Badge } from "../../components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card";
+import { Badge } from "../../../components/ui/badge";
 import { ArrowLeft, MapPin, Clock, FileText, User, UserCircle } from "lucide-react";
-import { CaseDetails } from "../../components/case-details";
-import { CaseTimeline } from "../../components/case-timeline";
-import { LocalizedMap } from "../../components/localized-map";
-import { NewsArticles } from "../../components/news-articles";
+import { CaseDetails } from "../../../components/case-details";
+import { CaseTimeline } from "../../../components/case-timeline";
+import { LocalizedMap } from "../../../components/localized-map";
+import { NewsArticles } from "../../../components/news-articles";
 
 async function getFIR(id: string) {
-  const base = process.env.NEXT_PUBLIC_OFFICER_URL || "";
-  const res = await fetch(`${base}/api/firs/${id}`);
+  const base = process.env.NEXT_PUBLIC_OFFICER_URL || "http://localhost:3001";
+  const res = await fetch(`${base}/api/firs/${id}`, { cache: "no-store" });
   if (!res.ok) return null;
   const data = await res.json();
   return data.fir;
 }
 
-export default async function CasePage({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default async function CasePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const fir = await getFIR(id);
   if (!fir) {
     notFound();
@@ -32,7 +32,6 @@ export default async function CasePage({ params }: { params: { id: string } }) {
               <ArrowLeft className="h-4 w-4" /> Back to Reports
             </Link>
           </div>
-
           <div className="space-y-6">
             <CaseDetails fir={fir} />
             <div className="mt-4">
