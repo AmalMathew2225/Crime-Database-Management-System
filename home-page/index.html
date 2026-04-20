@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>THUNA — Crime Database Management System</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Background grid decoration -->
+  <div class="bg-grid" aria-hidden="true"></div>
+
+  <!-- Ambient orbs -->
+  <div class="orb orb-1" aria-hidden="true"></div>
+  <div class="orb orb-2" aria-hidden="true"></div>
+
+  <div class="wrapper">
+
+    <!-- ── HEADER ─────────────────────────────────────── -->
+    <header class="site-header">
+      <div class="logo">
+        <div class="logo-mark" aria-hidden="true">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="14,2 26,9 26,19 14,26 2,19 2,9" fill="none" stroke="#F59E0B" stroke-width="1.5"/>
+            <polygon points="14,7 21,11 21,17 14,21 7,17 7,11" fill="none" stroke="#F59E0B" stroke-width="1" opacity="0.5"/>
+            <circle cx="14" cy="14" r="2.5" fill="#F59E0B"/>
+          </svg>
+        </div>
+        <span class="logo-name">THUNA</span>
+        <span class="logo-divider" aria-hidden="true"></span>
+        <span class="logo-sub">CDMS</span>
+      </div>
+      <div class="header-badge">v2.0 · Secure</div>
+    </header>
+
+    <!-- ── HERO ───────────────────────────────────────── -->
+    <main>
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-eyebrow">
+          <span class="dot" aria-hidden="true"></span>
+          Crime Database Management System
+        </div>
+        <h1 id="hero-title" class="hero-title">
+          Unified access to <br/>
+          <span class="accent">THUNA</span> Intelligence
+        </h1>
+        <p class="hero-desc">
+          Select your portal below. All sessions are encrypted, audited, and governed
+          by THUNA data-access policy.
+        </p>
+      </section>
+
+      <!-- ── PORTAL CARDS ──────────────────────────────── -->
+      <section class="portals" aria-label="Application portals">
+
+        <!-- Officer App -->
+        <a href="YOUR_OFFICER_APP_URL" class="portal-card portal-officer" aria-label="Enter Officer Portal">
+          <div class="card-glow" aria-hidden="true"></div>
+          <div class="card-inner">
+            <div class="card-icon-wrap officer-icon" aria-hidden="true">
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="6" y="4" width="20" height="24" rx="3" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                <path d="M11 10h10M11 15h10M11 20h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                <circle cx="16" cy="2" r="2" fill="currentColor" opacity="0.5"/>
+              </svg>
+            </div>
+            <div class="card-text">
+              <p class="card-label">Restricted Access</p>
+              <h2 class="card-title">Officer Portal</h2>
+              <p class="card-desc">Case management, incident reporting, evidence logs, and inter-department intelligence tools.</p>
+            </div>
+            <div class="card-features" aria-label="Features">
+              <span>Case Management</span>
+              <span>Evidence Logs</span>
+              <span>Intel Reports</span>
+            </div>
+            <div class="card-cta" aria-hidden="true">
+              Enter Portal
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+          <div class="card-corner-badge officer-badge" aria-hidden="true">OFFICER</div>
+        </a>
+
+        <!-- Public App -->
+        <a href="YOUR_PUBLIC_APP_URL" class="portal-card portal-public" aria-label="Enter Public Portal">
+          <div class="card-glow" aria-hidden="true"></div>
+          <div class="card-inner">
+            <div class="card-icon-wrap public-icon" aria-hidden="true">
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="16" cy="16" r="11" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                <ellipse cx="16" cy="16" rx="5" ry="11" stroke="currentColor" stroke-width="1" fill="none" opacity="0.5"/>
+                <path d="M5 16h22M16 5a14 14 0 0 1 0 22" stroke="currentColor" stroke-width="1" opacity="0.5"/>
+              </svg>
+            </div>
+            <div class="card-text">
+              <p class="card-label">Public Access</p>
+              <h2 class="card-title">Public Portal</h2>
+              <p class="card-desc">Community crime statistics, safe reporting, public safety alerts, and transparency dashboards.</p>
+            </div>
+            <div class="card-features" aria-label="Features">
+              <span>Crime Statistics</span>
+              <span>Report Tip</span>
+              <span>Safety Alerts</span>
+            </div>
+            <div class="card-cta" aria-hidden="true">
+              Enter Portal
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+          <div class="card-corner-badge public-badge" aria-hidden="true">PUBLIC</div>
+        </a>
+
+      </section>
+
+      <!-- ── STATS BAR ──────────────────────────────────── -->
+      <section class="stats-bar" aria-label="System statistics">
+        <div class="stat">
+          <span class="stat-num">99.9%</span>
+          <span class="stat-label">Uptime SLA</span>
+        </div>
+        <div class="stat-divider" aria-hidden="true"></div>
+        <div class="stat">
+          <span class="stat-num">256-bit</span>
+          <span class="stat-label">Encryption</span>
+        </div>
+        <div class="stat-divider" aria-hidden="true"></div>
+        <div class="stat">
+          <span class="stat-num">ISO 27001</span>
+          <span class="stat-label">Certified</span>
+        </div>
+        <div class="stat-divider" aria-hidden="true"></div>
+        <div class="stat">
+          <span class="stat-num">24 / 7</span>
+          <span class="stat-label">Monitoring</span>
+        </div>
+      </section>
+    </main>
+
+    <!-- ── FOOTER ─────────────────────────────────────── -->
+    <footer class="site-footer">
+      <p>&copy; <span id="year"></span> THUNA Crime Database Management System. Authorised access only.</p>
+      <nav aria-label="Footer links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Use</a>
+        <a href="#">Contact</a>
+      </nav>
+    </footer>
+
+  </div>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
