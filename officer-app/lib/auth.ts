@@ -25,7 +25,7 @@ export async function verifyPassword(password: string, hash: string) {
 }
 
 export function signToken(payload: Record<string, any>, expiresIn = "7d") {
-  return jwt.sign(payload, getJwtSecret(), { expiresIn });
+  return jwt.sign(payload, getJwtSecret(), { expiresIn } as jwt.SignOptions);
 }
 
 export function verifyToken(token: string) {
