@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { FIRTable } from "@/components/fir-table";
 import { FIRForm } from "@/components/fir-form";
@@ -234,7 +234,9 @@ export default function DashboardPage() {
                 </button>
               </div>
             </div>
-            <FIRTable firs={firs} stations={stations} crimeTypes={crimeTypes} />
+            <Suspense fallback={<div className="py-8 text-center text-muted-foreground">Loading cases...</div>}>
+              <FIRTable firs={firs} stations={stations} crimeTypes={crimeTypes} />
+            </Suspense>
           </main>
         </div>
       </div>
