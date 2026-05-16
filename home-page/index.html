@@ -1,351 +1,321 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html class="light" lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>THUNA CDMS — Kerala Police Crime Database Management System</title>
-  <meta name="description" content="THUNA CDMS — Unified Crime Database Management System for Kerala Police. Secure, encrypted, and audited access for officers and citizens." />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>THUNA CDMS | Unified Intelligence Access</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "error": "#ba1a1a",
+          "tertiary-container": "#592300",
+          "on-background": "#0d1c32",
+          "primary-fixed": "#d5e3ff",
+          "tertiary": "#381300",
+          "on-tertiary-fixed-variant": "#723610",
+          "surface-container-lowest": "#ffffff",
+          "on-secondary-fixed": "#241a00",
+          "on-secondary-fixed-variant": "#574500",
+          "surface": "#f9f9ff",
+          "on-surface-variant": "#43474f",
+          "outline": "#737780",
+          "outline-variant": "#c3c6d1",
+          "on-primary-fixed-variant": "#1f477b",
+          "surface-container-low": "#f0f3ff",
+          "primary": "#001e40",
+          "on-secondary-container": "#745c00",
+          "secondary": "#735c00",
+          "on-surface": "#0d1c32",
+          "surface-container-high": "#dfe8ff",
+          "background": "#f9f9ff",
+          "on-primary-container": "#799dd6",
+          "primary-fixed-dim": "#a7c8ff",
+          "inverse-surface": "#233148",
+          "on-primary": "#ffffff",
+          "on-tertiary-container": "#d8885c",
+          "inverse-on-surface": "#ecf0ff",
+          "tertiary-fixed": "#ffdbca",
+          "tertiary-fixed-dim": "#ffb690",
+          "surface-container-highest": "#d6e3ff",
+          "surface-tint": "#3a5f94",
+          "on-error-container": "#93000a",
+          "on-tertiary": "#ffffff",
+          "on-tertiary-fixed": "#341100",
+          "surface-dim": "#ccdaf8",
+          "primary-container": "#003366",
+          "on-secondary": "#ffffff",
+          "inverse-primary": "#a7c8ff",
+          "surface-container": "#e8eeff",
+          "secondary-fixed-dim": "#e9c349",
+          "error-container": "#ffdad6",
+          "on-primary-fixed": "#001b3c",
+          "secondary-fixed": "#ffe088",
+          "surface-bright": "#f9f9ff",
+          "surface-variant": "#d6e3ff",
+          "secondary-container": "#fed65b",
+          "on-error": "#ffffff",
+          "status-success": "#2E7D32"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.25rem",
+          "lg": "0.5rem",
+          "xl": "0.75rem",
+          "full": "9999px"
+        },
+        "spacing": {
+          "gutter": "16px",
+          "margin-mobile": "16px",
+          "unit": "4px",
+          "margin-desktop": "32px",
+          "container-max": "1280px"
+        },
+        "fontFamily": {
+          "label-md": ["Inter"],
+          "headline-lg": ["Inter"],
+          "headline-sm": ["Inter"],
+          "label-sm": ["Inter"],
+          "headline-md": ["Inter"],
+          "body-sm": ["Inter"],
+          "label-lg": ["Inter"],
+          "body-md": ["Inter"],
+          "body-lg": ["Inter"],
+          "headline-lg-mobile": ["Inter"],
+          "display-lg": ["Inter"]
+        },
+        "fontSize": {
+          "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+          "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+          "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+          "label-sm": ["11px", {"lineHeight": "16px", "letterSpacing": "0.03em", "fontWeight": "500"}],
+          "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+          "body-sm": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+          "label-lg": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+          "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+          "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+          "headline-lg-mobile": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+          "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "800"}]
+        }
+      }
+    }
+  }
+</script>
+<style>
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    vertical-align: middle;
+  }
+  .animate-pulse-slow {
+    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: .5; }
+  }
+  .theme-toggle-icon-sun { display: none; }
+  .dark .theme-toggle-icon-moon { display: none; }
+  .dark .theme-toggle-icon-sun { display: block; }
+</style>
+<script>
+  function toggleTheme() {
+    document.documentElement.classList.toggle('dark');
+    localStorage.setItem('thuna-theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+  }
+  // Apply saved theme on load
+  (function() {
+    const saved = localStorage.getItem('thuna-theme');
+    if (saved === 'dark') document.documentElement.classList.add('dark');
+    else document.documentElement.classList.remove('dark');
+  })();
+</script>
 </head>
-<body>
+<body class="bg-surface dark:bg-inverse-surface text-on-surface dark:text-inverse-on-surface font-body-md overflow-x-hidden transition-colors duration-300">
 
-  <!-- Ambient background layers -->
-  <div class="bg-layer" aria-hidden="true">
-    <div class="bg-grid"></div>
-    <div class="bg-orb orb-gold"></div>
-    <div class="bg-orb orb-blue"></div>
-    <div class="bg-noise"></div>
+<!-- Top Navigation -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-mobile md:px-margin-desktop h-16 bg-primary dark:bg-on-primary-fixed shadow-md">
+  <div class="flex items-center gap-3">
+    <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center p-0.5 overflow-hidden ring-2 ring-secondary-container">
+      <img alt="Kerala Police Logo" class="w-full h-full object-contain"
+        src="https://lh3.googleusercontent.com/aida-public/AB6AXuBSlxPE3OJp10O0PAmqGbRPHb8hQgDcPF2OMZwoyGUbkxenAdUiCD8ungUCfdUp76rQ4PfKXs6oYX6aNuALQNlHiQyC0yEeeLbZ5LxvF1_MUOX3vVMXr0RPHQkusyaYJs5Yx6St_SYBLGxu4VYinSy8OzWan2razHR8WgFUsVDUKOqyuGbVeILDtG2bAm00SCX1c64QAK2NcXNhx90BrGd_OYqZqZ3PJPfbdF3NJ2cuNdOXRfWwTbl1jnoaJe70yFG-9o6MpqOPAao">
+    </div>
+    <div class="flex flex-col">
+      <span class="font-headline-sm text-secondary-fixed dark:text-secondary-fixed-dim leading-none">THUNA CDMS</span>
+      <span class="text-[10px] text-on-primary/60 dark:text-on-primary-fixed-variant tracking-widest uppercase">v2.0 · Secure Access</span>
+    </div>
   </div>
-
-  <!-- ── NAVBAR ───────────────────────────────────────── -->
-  <nav class="navbar" role="navigation" aria-label="Main navigation">
-    <div class="nav-inner">
-
-      <!-- Logo -->
-      <a href="#" class="nav-logo" aria-label="THUNA CDMS Home">
-        <!-- Kerala Police Shield SVG -->
-        <div class="kp-shield" aria-hidden="true">
-          <svg width="42" height="48" viewBox="0 0 42 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <!-- Shield body -->
-            <path d="M21 2L38 9V24C38 34 30 42 21 46C12 42 4 34 4 24V9L21 2Z" fill="#001F3F" stroke="#FFD700" stroke-width="1.5"/>
-            <!-- Inner shield -->
-            <path d="M21 7L33 12.5V24C33 31 27.5 37.5 21 40C14.5 37.5 9 31 9 24V12.5L21 7Z" fill="#0a3060" stroke="#FFD700" stroke-width="0.8" opacity="0.8"/>
-            <!-- Star / emblem center -->
-            <circle cx="21" cy="22" r="5" fill="none" stroke="#FFD700" stroke-width="1.2"/>
-            <polygon points="21,15 22.5,20 27.5,20 23.5,23 25,28 21,25 17,28 18.5,23 14.5,20 19.5,20" fill="#FFD700" opacity="0.9"/>
-            <!-- Elephants (stylized) -->
-            <path d="M10 32 Q13 28 15 32 Q17 28 19 32" stroke="#FFD700" stroke-width="0.9" fill="none" opacity="0.75"/>
-            <path d="M23 32 Q25 28 27 32 Q29 28 31 32" stroke="#FFD700" stroke-width="0.9" fill="none" opacity="0.75"/>
-            <!-- Conch bottom -->
-            <path d="M18 37 Q21 34 24 37 Q21 40 18 37Z" fill="#FFD700" opacity="0.7"/>
-            <!-- Bottom motto band -->
-            <rect x="6" y="38" width="30" height="5" rx="1" fill="#FFD700" opacity="0.15"/>
-          </svg>
-        </div>
-        <div class="nav-brand">
-          <span class="brand-name">THUNA</span>
-          <span class="brand-sub">CDMS · Kerala Police</span>
-        </div>
-      </a>
-
-      <!-- Right side controls -->
-      <div class="nav-controls">
-        <div class="secure-pill" aria-label="Secure connection active">
-          <span class="secure-dot" aria-hidden="true"></span>
-          <span>Secure Connection</span>
-        </div>
-        <div class="nav-divider" aria-hidden="true"></div>
-        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light mode" title="Toggle theme">
-          <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-            <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-          </svg>
-          <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-          </svg>
-        </button>
-      </div>
+  <div class="flex gap-4 md:gap-8 items-center">
+    <div class="hidden sm:flex items-center gap-2 px-3 py-1 bg-status-success/20 rounded-full border border-status-success/30">
+      <span class="w-2 h-2 rounded-full bg-status-success animate-pulse"></span>
+      <span class="text-label-sm font-label-sm text-on-primary">SECURE CONNECTION</span>
     </div>
-  </nav>
+    <div class="flex items-center gap-4">
+      <button class="w-10 h-10 rounded-full flex items-center justify-center text-on-primary hover:bg-white/10 transition-colors" onclick="toggleTheme()" title="Toggle Theme">
+        <span class="material-symbols-outlined theme-toggle-icon-moon">dark_mode</span>
+        <span class="material-symbols-outlined theme-toggle-icon-sun">light_mode</span>
+      </button>
+      <button class="text-on-primary hover:text-secondary-fixed transition-colors">
+        <span class="material-symbols-outlined">help</span>
+      </button>
+    </div>
+  </div>
+</header>
 
-  <!-- ── HERO ──────────────────────────────────────────── -->
-  <header class="hero" role="banner">
-    <div class="container">
-
-      <!-- Eyebrow -->
-      <div class="hero-eyebrow">
-        <span class="eyebrow-line" aria-hidden="true"></span>
-        <span>Kerala Police · Established 1956</span>
-        <span class="eyebrow-line" aria-hidden="true"></span>
-      </div>
-
-      <!-- Large shield watermark -->
-      <div class="hero-emblem" aria-hidden="true">
-        <svg width="220" height="250" viewBox="0 0 42 48" fill="none" xmlns="http://www.w3.org/2000/svg" opacity="0.06">
-          <path d="M21 2L38 9V24C38 34 30 42 21 46C12 42 4 34 4 24V9L21 2Z" fill="#FFD700"/>
-          <polygon points="21,15 22.5,20 27.5,20 23.5,23 25,28 21,25 17,28 18.5,23 14.5,20 19.5,20" fill="#FFD700"/>
-        </svg>
-      </div>
-
-      <h1 class="hero-title">
-        Unified access to<br/>
-        <span class="hero-accent">THUNA</span> Intelligence
+<main class="pt-16 min-h-screen flex flex-col">
+  <!-- Hero Section -->
+  <section class="flex-grow flex flex-col items-center justify-center py-16 px-margin-mobile md:px-margin-desktop text-center">
+    <div class="max-w-4xl mx-auto mb-12">
+      <h1 class="font-display-lg text-primary dark:text-primary-fixed-dim mb-6">
+        Unified access to <br class="hidden md:block">
+        <span class="text-secondary dark:text-secondary-fixed">THUNA Intelligence</span>
       </h1>
-      <p class="hero-sub">
-        Select your portal below. All sessions are encrypted, audited, and governed<br class="br-desktop"/>
-        by THUNA data-access policy in accordance with Kerala Police regulations.
+      <p class="font-body-lg text-on-surface-variant dark:text-outline-variant max-w-2xl mx-auto">
+        Select your portal below. All sessions are encrypted, audited, and governed by THUNA data-access policy to ensure the highest standards of law enforcement integrity.
       </p>
-
-      <!-- Kerala Police Motto -->
-      <div class="motto-band" aria-label="Kerala Police motto">
-        <div class="motto-line" aria-hidden="true"></div>
-        <p class="motto-text">"<em>Janamaithri</em> — Towards a People-Friendly Police"</p>
-        <div class="motto-line" aria-hidden="true"></div>
-      </div>
-
     </div>
-  </header>
 
-  <!-- ── PORTAL CARDS ──────────────────────────────────── -->
-  <section class="portals-section" aria-labelledby="portals-heading">
-    <div class="container">
-      <h2 id="portals-heading" class="sr-only">Application Portals</h2>
-      <div class="portals-grid">
+    <!-- Portal Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-6xl mx-auto">
 
-        <!-- Officer Card -->
-        <a href="https://crime-database-management-system.vercel.app" class="portal-card card-officer" aria-label="Enter Officer Portal — restricted access">
-          <div class="card-shimmer" aria-hidden="true"></div>
-          <div class="card-badge badge-restricted">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a5 5 0 0 1 5 5v2h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h2V7a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v2h6V7a3 3 0 0 0-3-3z"/></svg>
-            Restricted Access
+      <!-- Officer Portal -->
+      <div class="group relative bg-primary dark:bg-primary-container rounded-xl overflow-hidden shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl flex flex-col text-left">
+        <div class="absolute top-0 right-0 p-6 opacity-10 pointer-events-none">
+          <span class="material-symbols-outlined text-[120px] text-white" style="font-variation-settings: 'FILL' 1;">local_police</span>
+        </div>
+        <div class="p-8 md:p-10 flex flex-col h-full z-10">
+          <div class="mb-8">
+            <span class="px-3 py-1 bg-secondary-container text-on-secondary-container text-label-md font-label-md rounded-full uppercase tracking-wider">Restricted Access</span>
           </div>
-          <div class="card-body">
-            <div class="card-icon officer-icon-wrap" aria-hidden="true">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 2L2 7v10l10 5 10-5V7L12 2z"/>
-                <path d="M12 22V12"/><path d="M2 7l10 5 10-5"/>
-              </svg>
+          <h2 class="font-headline-lg text-on-primary mb-4">Officer Portal</h2>
+          <p class="font-body-md text-on-primary/80 mb-8 max-w-sm">
+            Case management, incident reporting, evidence logs, and inter-department intelligence tools for verified Kerala Police personnel.
+          </p>
+          <div class="grid grid-cols-1 gap-4 mb-10">
+            <div class="flex items-center gap-3 text-on-primary/90">
+              <span class="material-symbols-outlined text-secondary-fixed">folder_shared</span>
+              <span class="font-body-md">Case Management</span>
             </div>
-            <h3 class="card-title">Officer Portal</h3>
-            <p class="card-desc">Internal law enforcement platform for case management, evidence handling, and inter-department intelligence coordination.</p>
-            <ul class="card-features" aria-label="Features">
-              <li>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
-                Case Management
-              </li>
-              <li>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
-                Evidence Logs
-              </li>
-              <li>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
-                Intel Reports
-              </li>
-              <li>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
-                FIR Filing
-              </li>
-            </ul>
-          </div>
-          <div class="card-footer">
-            <span class="cta-btn btn-gold">
-              Enter Portal
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-            </span>
-          </div>
-        </a>
-
-        <!-- Public Card -->
-        <a href="https://crime-database-management-system-c6.vercel.app" class="portal-card card-public" aria-label="Enter Public Portal — open access">
-          <div class="card-shimmer" aria-hidden="true"></div>
-          <div class="card-badge badge-public">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/><path d="M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20M2 12h20" stroke="white" stroke-width="1.5" fill="none"/></svg>
-            Public Access
-          </div>
-          <div class="card-body">
-            <div class="card-icon public-icon-wrap" aria-hidden="true">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="2" y1="12" x2="22" y2="12"/>
-                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-              </svg>
+            <div class="flex items-center gap-3 text-on-primary/90">
+              <span class="material-symbols-outlined text-secondary-fixed">inventory_2</span>
+              <span class="font-body-md">Evidence Logs</span>
             </div>
-            <h3 class="card-title">Public Portal</h3>
-            <p class="card-desc">Transparent access to crime statistics, public safety alerts, and the ability to report tips — open to all citizens of Kerala.</p>
-            <ul class="card-features" aria-label="Features">
-              <li>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
-                Crime Statistics
-              </li>
-              <li>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
-                Report a Tip
-              </li>
-              <li>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
-                Safety Alerts
-              </li>
-              <li>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
-                FIR Status
-              </li>
-            </ul>
+            <div class="flex items-center gap-3 text-on-primary/90">
+              <span class="material-symbols-outlined text-secondary-fixed">psychology</span>
+              <span class="font-body-md">Intel Reports</span>
+            </div>
           </div>
-          <div class="card-footer">
-            <span class="cta-btn btn-navy">
+          <div class="mt-auto">
+            <a class="inline-flex items-center gap-2 bg-secondary-container text-on-secondary-container px-8 py-4 rounded-lg font-bold hover:bg-secondary-fixed transition-all hover:scale-105 active:scale-95"
+              href="https://crime-database-management-system.vercel.app">
               Enter Portal
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-            </span>
+              <span class="material-symbols-outlined">arrow_forward</span>
+            </a>
+            <div class="mt-4 text-on-primary/40 font-label-sm text-label-sm tracking-widest uppercase">OFFICER LOGIN REQUIRED</div>
           </div>
-        </a>
-
+        </div>
       </div>
+
+      <!-- Public Portal -->
+      <div class="group relative bg-surface-container-lowest dark:bg-surface-container-low border border-outline-variant dark:border-outline/30 rounded-xl overflow-hidden shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl flex flex-col text-left">
+        <div class="absolute top-0 right-0 p-6 opacity-5 pointer-events-none">
+          <span class="material-symbols-outlined text-[120px] text-primary dark:text-primary-fixed" style="font-variation-settings: 'FILL' 1;">public</span>
+        </div>
+        <div class="p-8 md:p-10 flex flex-col h-full z-10">
+          <div class="mb-8">
+            <span class="px-3 py-1 bg-surface-container-high dark:bg-inverse-surface text-primary dark:text-primary-fixed-dim text-label-md font-label-md rounded-full uppercase tracking-wider border border-outline-variant">Public Access</span>
+          </div>
+          <h2 class="font-headline-lg text-primary dark:text-primary-fixed-dim mb-4">Public Portal</h2>
+          <p class="font-body-md text-on-surface-variant dark:text-outline-variant mb-8 max-w-sm">
+            Community crime statistics, safe reporting, public safety alerts, and transparency dashboards for the general public.
+          </p>
+          <div class="grid grid-cols-1 gap-4 mb-10">
+            <div class="flex items-center gap-3 text-on-surface dark:text-inverse-on-surface">
+              <span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim">bar_chart</span>
+              <span class="font-body-md">Crime Statistics</span>
+            </div>
+            <div class="flex items-center gap-3 text-on-surface dark:text-inverse-on-surface">
+              <span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim">campaign</span>
+              <span class="font-body-md">Report Tip</span>
+            </div>
+            <div class="flex items-center gap-3 text-on-surface dark:text-inverse-on-surface">
+              <span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim">notifications_active</span>
+              <span class="font-body-md">Safety Alerts</span>
+            </div>
+          </div>
+          <div class="mt-auto">
+            <a class="inline-flex items-center gap-2 bg-primary dark:bg-primary-fixed text-on-primary dark:text-on-primary-fixed px-8 py-4 rounded-lg font-bold hover:bg-primary-container dark:hover:bg-primary-fixed-dim transition-all hover:scale-105 active:scale-95"
+              href="https://crime-database-management-system-c6.vercel.app">
+              Enter Portal
+              <span class="material-symbols-outlined">arrow_forward</span>
+            </a>
+            <div class="mt-4 text-on-surface-variant/40 dark:text-outline/40 font-label-sm text-label-sm tracking-widest uppercase">GUEST ACCESS ENABLED</div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </section>
 
-  <!-- ── ABOUT KERALA POLICE ────────────────────────────── -->
-  <section class="about-section" aria-labelledby="about-heading">
-    <div class="container">
-      <h2 id="about-heading" class="section-heading">Kerala Police — <span class="text-gold">Serving Since 1956</span></h2>
-      <p class="section-sub">One of India's most modernised and community-oriented police forces, Kerala Police is committed to maintaining peace, upholding the law, and building trust with every citizen.</p>
-      <div class="about-grid">
-        <div class="about-card">
-          <div class="about-icon" aria-hidden="true">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-          </div>
-          <h3>Janamaithri</h3>
-          <p>Community policing program that brings officers closer to citizens for a safer, more connected Kerala.</p>
+  <!-- Trust Section -->
+  <section class="bg-surface-container-low dark:bg-surface-container py-12 border-y border-outline-variant dark:border-outline/20">
+    <div class="max-w-6xl mx-auto px-margin-desktop">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+        <div class="flex flex-col items-center text-center">
+          <span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim mb-3 text-[32px]">speed</span>
+          <span class="font-headline-md text-primary dark:text-primary-fixed">99.9%</span>
+          <span class="font-label-md text-on-surface-variant dark:text-on-primary/70">Uptime SLA</span>
         </div>
-        <div class="about-card">
-          <div class="about-icon" aria-hidden="true">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-          </div>
-          <h3>24/7 Response</h3>
-          <p>Round-the-clock emergency response with dedicated units across all 14 districts of Kerala.</p>
+        <div class="flex flex-col items-center text-center">
+          <span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim mb-3 text-[32px]">lock</span>
+          <span class="font-headline-md text-primary dark:text-primary-fixed">256-bit</span>
+          <span class="font-label-md text-on-surface-variant dark:text-on-primary/70">AES Encryption</span>
         </div>
-        <div class="about-card">
-          <div class="about-icon" aria-hidden="true">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-          </div>
-          <h3>Digital First</h3>
-          <p>THUNA CDMS digitises all crime records, FIRs, and case management for transparency and efficiency.</p>
+        <div class="flex flex-col items-center text-center">
+          <span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim mb-3 text-[32px]">verified</span>
+          <span class="font-headline-md text-primary dark:text-primary-fixed">ISO 27001</span>
+          <span class="font-label-md text-on-surface-variant dark:text-on-primary/70">Security Certified</span>
         </div>
-        <div class="about-card">
-          <div class="about-icon" aria-hidden="true">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 2L2 7v10l10 5 10-5V7L12 2z"/></svg>
-          </div>
-          <h3>PINK Police</h3>
-          <p>Dedicated women-safety units under the PINK Police initiative providing specialised support statewide.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── TRUST INDICATORS ──────────────────────────────── -->
-  <section class="trust-section" aria-labelledby="trust-heading">
-    <div class="container">
-      <h2 id="trust-heading" class="section-heading">Built for <span class="text-gold">Security & Trust</span></h2>
-      <div class="trust-grid">
-        <div class="trust-item">
-          <div class="trust-icon" aria-hidden="true">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-          </div>
-          <div class="trust-num">99.9%</div>
-          <div class="trust-label">Uptime SLA</div>
-        </div>
-        <div class="trust-divider" aria-hidden="true"></div>
-        <div class="trust-item">
-          <div class="trust-icon" aria-hidden="true">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          </div>
-          <div class="trust-num">256-bit</div>
-          <div class="trust-label">AES Encryption</div>
-        </div>
-        <div class="trust-divider" aria-hidden="true"></div>
-        <div class="trust-item">
-          <div class="trust-icon" aria-hidden="true">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 2L2 7v10l10 5 10-5V7L12 2z"/><path d="M9 12l2 2 4-4"/></svg>
-          </div>
-          <div class="trust-num">ISO 27001</div>
-          <div class="trust-label">Security Certified</div>
-        </div>
-        <div class="trust-divider" aria-hidden="true"></div>
-        <div class="trust-item">
-          <div class="trust-icon" aria-hidden="true">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          </div>
-          <div class="trust-num">24 / 7</div>
-          <div class="trust-label">Monitoring</div>
+        <div class="flex flex-col items-center text-center">
+          <span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim mb-3 text-[32px]">visibility</span>
+          <span class="font-headline-md text-primary dark:text-primary-fixed">24 / 7</span>
+          <span class="font-label-md text-on-surface-variant dark:text-on-primary/70">Monitoring</span>
         </div>
       </div>
     </div>
   </section>
+</main>
 
-  <!-- ── FOOTER ────────────────────────────────────────── -->
-  <footer class="site-footer" role="contentinfo">
-    <div class="footer-inner">
-      <div class="footer-brand">
-        <div class="footer-logo">
-          <svg width="28" height="32" viewBox="0 0 42 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M21 2L38 9V24C38 34 30 42 21 46C12 42 4 34 4 24V9L21 2Z" fill="rgba(255,215,0,0.15)" stroke="#FFD700" stroke-width="1.5"/>
-            <polygon points="21,15 22.5,20 27.5,20 23.5,23 25,28 21,25 17,28 18.5,23 14.5,20 19.5,20" fill="#FFD700"/>
-          </svg>
-          <div>
-            <div class="footer-brand-name">THUNA CDMS</div>
-            <div class="footer-brand-sub">Kerala Police</div>
-          </div>
-        </div>
-        <p class="footer-copy">© <span id="footer-year"></span> Kerala Police. THUNA CDMS.<br/>Secured with 256-bit AES Encryption.</p>
-      </div>
-      <nav class="footer-nav" aria-label="Footer links">
-        <a href="#">Privacy Policy</a>
-        <a href="#">Terms of Use</a>
-        <a href="#">Admin Portal</a>
-        <a href="#">Contact</a>
-      </nav>
-      <div class="footer-cert">
-        <span class="cert-badge">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7v10l10 5 10-5V7L12 2z"/><path d="M9 12l2 2 4-4"/></svg>
-          Verified Secure
-        </span>
-        <span class="cert-badge">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          End-to-End Encrypted
-        </span>
-      </div>
-    </div>
-  </footer>
+<!-- Footer -->
+<footer class="w-full py-8 px-margin-mobile md:px-margin-desktop flex flex-col md:flex-row justify-between items-center gap-6 bg-primary dark:bg-on-primary-fixed text-on-primary">
+  <div class="flex flex-col items-center md:items-start gap-1">
+    <span class="font-bold text-secondary-fixed dark:text-secondary-fixed-dim font-label-lg text-label-lg uppercase tracking-wider">THUNA CDMS</span>
+    <span class="font-label-sm text-label-sm text-on-primary/60 text-center md:text-left dark:text-on-primary/80">
+      © <span id="footer-year"></span> Kerala Police. All Rights Reserved. Secure Infrastructure.
+    </span>
+  </div>
+  <div class="flex flex-wrap justify-center gap-x-6 gap-y-2">
+    <a class="font-label-sm text-label-sm text-on-primary/80 hover:text-secondary-fixed transition-colors" href="#">Privacy Policy</a>
+    <a class="font-label-sm text-label-sm text-on-primary/80 hover:text-secondary-fixed transition-colors" href="#">Terms of Service</a>
+    <a class="font-label-sm text-label-sm text-on-primary/80 hover:text-secondary-fixed transition-colors" href="#">Security</a>
+    <a class="font-label-sm text-label-sm text-on-primary/80 hover:text-secondary-fixed transition-colors"
+      href="https://crime-database-management-system.vercel.app">Admin Portal</a>
+  </div>
+</footer>
 
-  <script>
-    // Year
-    document.getElementById('footer-year').textContent = new Date().getFullYear();
+<!-- Background Decoration -->
+<div class="fixed top-0 right-0 -z-10 w-1/2 h-full opacity-10 dark:opacity-5 pointer-events-none overflow-hidden">
+  <div class="absolute top-1/4 -right-1/4 w-[600px] h-[600px] border-[40px] border-primary-container rounded-full blur-3xl"></div>
+</div>
+<div class="fixed bottom-0 left-0 -z-10 w-1/2 h-full opacity-5 dark:opacity-10 pointer-events-none overflow-hidden">
+  <div class="absolute bottom-0 -left-1/4 w-[800px] h-[800px] bg-secondary-container rounded-full blur-[120px]"></div>
+</div>
 
-    // Theme toggle
-    const toggle = document.getElementById('themeToggle');
-    const html = document.documentElement;
-    const saved = localStorage.getItem('thuna-theme') || 'dark';
-    html.setAttribute('data-theme', saved);
-
-    toggle.addEventListener('click', () => {
-      const current = html.getAttribute('data-theme');
-      const next = current === 'dark' ? 'light' : 'dark';
-      html.setAttribute('data-theme', next);
-      localStorage.setItem('thuna-theme', next);
-    });
-
-    // Scroll reveal
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
-    }, { threshold: 0.1 });
-    document.querySelectorAll('.portal-card, .about-card, .trust-item').forEach(el => {
-      el.classList.add('reveal');
-      observer.observe(el);
-    });
-  </script>
+<script>
+  document.getElementById('footer-year').textContent = new Date().getFullYear();
+</script>
 </body>
 </html>

@@ -23,7 +23,6 @@ export function PublicPortalShell({ children }: { children: ReactNode }) {
 
                         <nav className="hidden items-center gap-6 md:flex">
                             <a href="/" className="text-sm font-medium text-slate-600 transition-colors hover:text-blue-600">Home</a>
-                            <a href="/stats" className="text-sm font-medium text-slate-600 transition-colors hover:text-blue-600">Statistics</a>
                             <a href="/heatmap" className="text-sm font-medium text-slate-600 transition-colors hover:text-blue-600">Heatmap</a>
                             <div className="h-4 w-px bg-slate-200" />
                             <LanguageToggle />
