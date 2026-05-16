@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ShieldCheck, BadgeCheck, ArrowRight, AlertCircle } from "lucide-react";
 
 export default function OfficerLoginPage() {
   const [badge, setBadge] = useState("");
@@ -25,16 +24,13 @@ export default function OfficerLoginPage() {
 
     setLoading(true);
     try {
-      // Verify badge against the API — rejects unknown badges
       const res = await fetch("/api/auth/me", {
         headers: { "x-officer-badge": trimmed },
       });
-
       if (!res.ok) {
         setError("Badge not recognised. Please check your badge number or contact your station administrator.");
         return;
       }
-
       localStorage.setItem("officer_badge", trimmed);
       router.replace("/dashboard");
     } catch {
@@ -45,95 +41,199 @@ export default function OfficerLoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900">
-      {/* Decorative blobs */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-32 -left-32 h-96 w-96 rounded-full bg-blue-500 opacity-10 blur-3xl" />
-        <div className="absolute -bottom-32 -right-32 h-96 w-96 rounded-full bg-indigo-500 opacity-10 blur-3xl" />
-      </div>
+    <>
+      {/* Inject Tailwind CDN + fonts inline for this page */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+        .material-symbols-outlined {
+          font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+          font-family: 'Material Symbols Outlined';
+          font-style: normal;
+          display: inline-block;
+          line-height: 1;
+          vertical-align: middle;
+        }
+        .glass-panel {
+          background: rgba(0, 30, 64, 0.6);
+          backdrop-filter: blur(16px);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .deep-gradient {
+          background: radial-gradient(circle at center, #003366 0%, #001e40 100%);
+        }
+        .login-input {
+          width: 100%;
+          padding: 1rem 1rem 1rem 3rem;
+          background: rgba(0, 30, 64, 0.4);
+          border: 1px solid rgba(195, 198, 209, 0.3);
+          border-radius: 0.5rem;
+          color: white;
+          font-size: 16px;
+          font-family: 'Inter', sans-serif;
+          outline: none;
+          transition: all 0.2s;
+        }
+        .login-input::placeholder { color: rgba(121, 157, 214, 0.4); }
+        .login-input:focus { ring: 2px solid #ffe088; border-color: transparent; box-shadow: 0 0 0 2px #ffe088; }
+        .login-btn {
+          width: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          padding: 1rem 1.5rem;
+          background: #fed65b;
+          color: #241a00;
+          font-weight: 600;
+          font-size: 14px;
+          font-family: 'Inter', sans-serif;
+          border-radius: 0.5rem;
+          border: none;
+          cursor: pointer;
+          transition: all 0.2s;
+          box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2);
+        }
+        .login-btn:hover { background: #e9c349; transform: scale(1.01); }
+        .login-btn:active { transform: scale(0.98); }
+        .login-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .spin { animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+      `}</style>
 
-      <div className="flex flex-1 items-center justify-center px-4 py-16 relative z-10">
-        <div className="w-full max-w-md">
-          {/* Logo */}
-          <div className="mb-8 flex flex-col items-center text-center">
-            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-600 shadow-2xl shadow-blue-600/40">
-              <ShieldCheck className="h-9 w-9 text-white" />
+      <div className="deep-gradient" style={{
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        fontFamily: "'Inter', sans-serif",
+        color: "white",
+        padding: "0 16px",
+      }}>
+
+        {/* Background accents */}
+        <div style={{
+          position: "fixed", top: "-10%", right: "-5%",
+          width: 400, height: 400,
+          background: "rgba(0, 51, 102, 0.2)",
+          borderRadius: "50%", filter: "blur(120px)", zIndex: 0, pointerEvents: "none",
+        }} />
+        <div style={{
+          position: "fixed", bottom: "-10%", left: "-5%",
+          width: 400, height: 400,
+          background: "rgba(254, 214, 91, 0.1)",
+          borderRadius: "50%", filter: "blur(120px)", zIndex: 0, pointerEvents: "none",
+        }} />
+
+        <main style={{ width: "100%", maxWidth: 480, display: "flex", flexDirection: "column", alignItems: "center", gap: 32, position: "relative", zIndex: 1 }}>
+
+          {/* Brand Header */}
+          <header style={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
+            <div style={{ width: 128, height: 128, display: "flex", alignItems: "center", justifyContent: "center", padding: 8, borderRadius: 12, marginBottom: 8 }}>
+              <img
+                alt="Kerala Police Logo"
+                src="https://lh3.googleusercontent.com/aida/ADBb0ugaXps9Q2RB5JyTNAQmEK3Uv2VauFOi7MCAoRHg9cZ8_wTlHjeerduV5lQ_xkmSm_gSdUevuLs1bt7vgQit1YuQjRuBQrAYOzGBE0gedAQg54XDp6gumlUwqqR2p2xtLxLM2SDL8tzRF6ddVR2w3AcGAq8OT2ffq53vbOLICwbG2PHZrg5EzyLHBcIDPULRauHApkzzjdGOknA38mF11JKpbQPknMcLJy0lFcCTVubqUm_2-2hApF7YeS0"
+                style={{ width: "100%", height: "100%", objectFit: "contain" }}
+              />
             </div>
-            <h1 className="text-2xl font-extrabold text-white tracking-tight">Kerala Police</h1>
-            <p className="mt-1 text-sm text-blue-300">Officer Access — Crime Management System</p>
-          </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              <h1 style={{ fontSize: 32, lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: 700, textTransform: "uppercase" }}>Kerala Police</h1>
+              <p style={{ fontSize: 14, letterSpacing: "0.15em", textTransform: "uppercase", color: "#799dd6", fontWeight: 600 }}>
+                Officer Access — Crime Management System
+              </p>
+            </div>
+          </header>
 
-          {/* Card */}
-          <div className="rounded-3xl bg-white/5 border border-white/10 backdrop-blur-xl p-8 shadow-2xl">
-            <div className="mb-6">
-              <h2 className="text-xl font-bold text-white">Officer Verification</h2>
-              <p className="mt-1 text-sm text-slate-400">
+          {/* Login Card */}
+          <section className="glass-panel" style={{ width: "100%", padding: 32, borderRadius: 12, boxShadow: "0 25px 50px -12px rgba(0,0,0,0.5)" }}>
+            <div style={{ marginBottom: 32 }}>
+              <h2 style={{ fontSize: 24, fontWeight: 600, color: "white", marginBottom: 8 }}>Officer Verification</h2>
+              <p style={{ fontSize: 14, color: "rgba(121, 157, 214, 0.8)", lineHeight: "20px" }}>
                 Enter your Identity Badge Number to access the officer dashboard.
               </p>
             </div>
 
             {error && (
-              <div className="mb-4 flex items-start gap-2 rounded-xl bg-red-500/10 border border-red-500/30 px-4 py-3 text-sm text-red-400">
-                <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+              <div style={{
+                marginBottom: 16,
+                display: "flex", alignItems: "flex-start", gap: 8,
+                background: "rgba(186, 26, 26, 0.15)", border: "1px solid rgba(186,26,26,0.4)",
+                borderRadius: 8, padding: "12px 16px",
+                color: "#fca5a5", fontSize: 13,
+              }}>
+                <span className="material-symbols-outlined" style={{ fontSize: 16, marginTop: 1, flexShrink: 0, fontVariationSettings: "'FILL' 1" }}>error</span>
                 {error}
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div>
-                <label htmlFor="badge" className="block text-sm font-semibold text-slate-300 mb-1.5">
+            <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <label htmlFor="badge-number" style={{ fontSize: 14, fontWeight: 600, color: "#ffe088", letterSpacing: "0.01em" }}>
                   Identity Badge Number
                 </label>
-                <div className="relative">
-                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
-                    <BadgeCheck className="h-5 w-5" />
+                <div style={{ position: "relative" }}>
+                  <div style={{ position: "absolute", top: 0, left: 0, bottom: 0, paddingLeft: 16, display: "flex", alignItems: "center", pointerEvents: "none" }}>
+                    <span className="material-symbols-outlined" style={{ color: "#799dd6", fontSize: 22 }}>badge</span>
                   </div>
                   <input
-                    id="badge"
+                    className="login-input"
+                    id="badge-number"
+                    name="badge-number"
                     type="text"
                     autoFocus
                     autoComplete="off"
                     placeholder="e.g. KP1234567"
                     value={badge}
                     onChange={(e) => setBadge(e.target.value.toUpperCase())}
-                    className="w-full rounded-xl border border-white/10 bg-white/5 pl-10 pr-4 py-3 text-white placeholder-slate-500 text-sm font-medium tracking-widest focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
                   />
                 </div>
-                <p className="mt-1.5 text-xs text-slate-500">
+                <p style={{ fontSize: 11, color: "rgba(121, 157, 214, 0.6)", letterSpacing: "0.03em" }}>
                   Format: Alphanumeric, 4–12 characters (e.g., KP1001 or KP1234567)
                 </p>
               </div>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-600/30 hover:bg-blue-500 active:scale-95 transition-all disabled:opacity-60"
-              >
+              <button type="submit" disabled={loading} className="login-btn">
                 {loading ? (
                   <>
-                    <span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                    <div className="spin" style={{ width: 16, height: 16, border: "2px solid rgba(36,26,0,0.3)", borderTopColor: "#241a00", borderRadius: "50%" }} />
                     Verifying...
                   </>
                 ) : (
                   <>
                     Access Dashboard
-                    <ArrowRight className="h-4 w-4" />
+                    <span className="material-symbols-outlined" style={{ fontSize: 20 }}>arrow_forward</span>
                   </>
                 )}
               </button>
+
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, paddingTop: 16, borderTop: "1px solid rgba(195, 198, 209, 0.1)" }}>
+                <span className="material-symbols-outlined" style={{ fontSize: 14, color: "#ffe088", fontVariationSettings: "'FILL' 1" }}>verified_user</span>
+                <p style={{ fontSize: 11, color: "rgba(121, 157, 214, 0.7)", letterSpacing: "0.03em" }}>Authorized Kerala Police Personnel Only</p>
+              </div>
             </form>
+          </section>
 
-            <div className="mt-6 flex items-center gap-2 text-xs text-slate-500 justify-center">
-              <ShieldCheck className="h-3.5 w-3.5" />
-              Authorized Kerala Police Personnel Only
+          {/* Footer */}
+          <footer style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: 16, textAlign: "center" }}>
+            <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "8px 24px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 4, color: "rgba(121, 157, 214, 0.6)", fontSize: 11 }}>
+                <span className="material-symbols-outlined" style={{ fontSize: 14 }}>lock</span>
+                256-bit AES Encryption
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 4, color: "rgba(121, 157, 214, 0.6)", fontSize: 11 }}>
+                <span className="material-symbols-outlined" style={{ fontSize: 14 }}>gpp_maybe</span>
+                End-to-End Secure
+              </div>
             </div>
-          </div>
-
-          <p className="mt-6 text-center text-xs text-slate-600">
-            &copy; 2026 Kerala Police · Crime Management System
-          </p>
-        </div>
+            <div style={{ paddingTop: 8, borderTop: "1px solid rgba(121, 157, 214, 0.1)", width: "100%", maxWidth: 300 }}>
+              <p style={{ fontSize: 11, color: "rgba(121, 157, 214, 0.4)" }}>
+                © {new Date().getFullYear()} Kerala Police. THUNA CDMS. Secured with 256-bit AES Encryption.
+              </p>
+            </div>
+          </footer>
+        </main>
       </div>
-    </div>
+    </>
   );
 }
