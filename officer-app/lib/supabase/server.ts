@@ -1,6 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 
+/** Cookie-aware client — for pages/server-components that need the user session */
 export async function createClient() {
   const cookieStore = await cookies();
 
@@ -18,8 +20,7 @@ export async function createClient() {
               cookieStore.set(name, value, options),
             );
           } catch {
-            // The "setAll" method was called from a Server Component.
-            // This can be ignored if you have proxy refreshing user sessions.
+            // Ignore from Server Components
           }
         },
       },
@@ -27,3 +28,14 @@ export async function createClient() {
   );
 }
 
+/**
+ * Service-role client — bypasses RLS for trusted server-side API routes.
+ * Never expose this client to the browser.
+ */
+export function createServiceClient() {
+  return createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { persistSession: false, autoRefreshToken: false } }
+  );
+}

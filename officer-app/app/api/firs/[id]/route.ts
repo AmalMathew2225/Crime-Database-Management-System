@@ -1,91 +1,123 @@
 import { NextResponse, NextRequest } from "next/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import { mockDashboardData } from "@/lib/mock-data";
-import { runtimeFirs } from "@/lib/fir-store";
 import { z } from "zod";
 
-// Find a FIR by id — runtime store shadows mock data (runtime entries take priority)
-function findFir(id: string) {
-  return (
-    runtimeFirs.find((f) => f.id === id) ??
-    mockDashboardData.firs.find((f) => f.id === id) ??
-    null
-  );
+const FIR_SELECT = `
+  *,
+  police_stations ( id, name, district, code ),
+  crime_types     ( id, name, ipc_section ),
+  officers        ( id, name, rank, badge_number )
+`;
+
+function shapeRow(row: any) {
+  return {
+    id:                        row.id,
+    fir_number:                row.fir_number,
+    date_filed:                row.date_filed,
+    status:                    row.status,
+    location:                  row.location,
+    location_ml:               row.location_ml ?? row.location,
+    description:               row.description,
+    act:                       row.act,
+    sections:                  row.sections,
+    occurrence_date:           row.occurrence_date,
+    occurrence_time:           row.occurrence_time,
+    complainant_name:          row.complainant_name,
+    accused_details:           row.accused_details,
+    crime_type_id:             row.crime_type_id,
+    police_station_id:         row.police_station_id,
+    investigating_officer_id:  row.investigating_officer_id,
+    created_at:                row.created_at,
+    updated_at:                row.updated_at,
+    police_stations:           row.police_stations ?? null,
+    crime_types:               row.crime_types     ?? null,
+    officers:                  row.officers        ?? null,
+    // extended fields for case detail page
+    case_notes:                row.case_notes      ?? [],
+    evidence:                  row.evidence        ?? [],
+  };
 }
 
+// ── GET /api/firs/[id] ─────────────────────────────────────────────────────────
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
+
+  // ── Try Supabase ─────────────────────────────────────────────────────────────
   try {
-    const { id } = await params;
-    const fir = findFir(id);
-    if (!fir) return NextResponse.json({ error: "Not found" }, { status: 404 });
-    return NextResponse.json({ fir });
+    const supabase = createServiceClient();
+    const { data, error } = await supabase
+      .from("firs")
+      .select(FIR_SELECT)
+      .eq("id", id)
+      .single();
+
+    if (!error && data) {
+      return NextResponse.json({ fir: shapeRow(data) });
+    }
   } catch (err) {
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    console.warn(`[/api/firs/${id}] Supabase error, trying mock:`, err);
   }
+
+  // ── Fallback: mock data ───────────────────────────────────────────────────────
+  const fir = mockDashboardData.firs.find((f: any) => f.id === id) ?? null;
+  if (!fir) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  return NextResponse.json({ fir });
 }
 
+// ── PATCH /api/firs/[id] ──────────────────────────────────────────────────────
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  try {
-    const { id } = await params;
-    const body = await request.json();
+  const { id } = await params;
 
-    const updateSchema = z.object({
-      status: z.string().optional(),
-      description: z.string().optional(),
-      location: z.string().optional(),
-    });
+  const updateSchema = z.object({
+    status:      z.string().optional(),
+    description: z.string().optional(),
+    location:    z.string().optional(),
+  });
 
-    const parsed = updateSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json({ error: "Invalid data" }, { status: 400 });
-    }
-
-    // Case 1: FIR is already in runtimeFirs — update in place
-    const runtimeIdx = runtimeFirs.findIndex((f) => f.id === id);
-    if (runtimeIdx !== -1) {
-      runtimeFirs[runtimeIdx] = {
-        ...runtimeFirs[runtimeIdx],
-        ...parsed.data,
-        updated_at: new Date().toISOString(),
-      };
-      return NextResponse.json({ fir: runtimeFirs[runtimeIdx] });
-    }
-
-    // Case 2: FIR is a mock entry — promote to runtimeFirs with updates applied
-    // Note: this update only persists for the lifetime of the server process.
-    // On server restart, mock FIRs revert to their original values.
-    const mockFir = mockDashboardData.firs.find((f) => f.id === id);
-    if (!mockFir) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
-    }
-
-    const updated = {
-      ...mockFir,
-      ...parsed.data,
-      updated_at: new Date().toISOString(),
-      // Preserve resolved relations
-      police_stations: mockFir.police_stations,
-      crime_types: mockFir.crime_types,
-      officers: mockFir.officers,
-    };
-
-    // Promote to runtimeFirs so subsequent GETs return the updated version
-    // (runtimeFirs is checked before mockDashboardData in findFir)
-    runtimeFirs.unshift(updated);
-
-    return NextResponse.json({
-      fir: updated,
-      _warning:
-        process.env.NODE_ENV !== "production"
-          ? "This update is stored in memory only and will be lost on server restart. Connect Supabase for persistent storage."
-          : undefined,
-    });
-  } catch (err) {
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+  const body = await request.json();
+  const parsed = updateSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json({ error: "Invalid data" }, { status: 400 });
   }
+
+  // ── Try Supabase first ────────────────────────────────────────────────────────
+  try {
+    const supabase = createServiceClient();
+
+    // Check the FIR exists in DB
+    const { data: existing } = await supabase
+      .from("firs")
+      .select("id")
+      .eq("id", id)
+      .single();
+
+    if (existing) {
+      const { data: updated, error } = await supabase
+        .from("firs")
+        .update({ ...parsed.data, updated_at: new Date().toISOString() })
+        .eq("id", id)
+        .select(FIR_SELECT)
+        .single();
+
+      if (error) throw error;
+      return NextResponse.json({ fir: shapeRow(updated) });
+    }
+  } catch (err) {
+    console.warn(`[PATCH /api/firs/${id}] Supabase error:`, err);
+    return NextResponse.json({ error: "Failed to update case" }, { status: 500 });
+  }
+
+  // ── FIR not in Supabase — it's a mock entry ───────────────────────────────────
+  const mockFir = mockDashboardData.firs.find((f: any) => f.id === id);
+  if (!mockFir) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  const updated = { ...mockFir, ...parsed.data, updated_at: new Date().toISOString() };
+  return NextResponse.json({ fir: updated, _source: "mock" });
 }

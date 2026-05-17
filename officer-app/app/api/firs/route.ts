@@ -1,139 +1,107 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
+import { createServiceClient } from "@/lib/supabase/server";
 import { mockDashboardData } from "@/lib/mock-data";
-import { runtimeFirs } from "@/lib/fir-store";
 
-function sanitizeString(v: any) {
-  if (v === null || v === undefined) return null;
-  return String(v).trim();
+const FIR_SELECT = `
+  *,
+  police_stations ( id, name, district, code ),
+  crime_types     ( id, name, ipc_section ),
+  officers        ( id, name, rank, badge_number )
+`;
+
+// ── Supabase fetch ─────────────────────────────────────────────────────────────
+async function getFirsFromDB(filters: Record<string, string | null>) {
+  const supabase = createServiceClient();
+
+  let query = supabase
+    .from("firs")
+    .select(FIR_SELECT)
+    .order("date_filed", { ascending: false });
+
+  if (filters.id)        query = query.eq("id", filters.id);
+  if (filters.status)    query = query.eq("status", filters.status);
+  if (filters.location)  query = query.ilike("location", `%${filters.location}%`);
+  if (filters.date_from) query = query.gte("date_filed", filters.date_from);
+  if (filters.date_to)   query = query.lte("date_filed", filters.date_to);
+  if (filters.crime_type) {
+    // crime_type param can be an ID or a name — try both
+    query = query.eq("crime_type_id", filters.crime_type);
+  }
+
+  const { data, error } = await query;
+  if (error) throw error;
+  return data ?? [];
 }
 
-function toNullableNumber(v: any) {
-  if (v === null || v === undefined || v === "") return null;
-  const n = Number(v);
-  return Number.isFinite(n) ? n : null;
+// ── Shape a Supabase row to match the format both portals expect ───────────────
+function shapeRow(row: any) {
+  return {
+    id:                        row.id,
+    fir_number:                row.fir_number,
+    date_filed:                row.date_filed,
+    status:                    row.status,
+    location:                  row.location,
+    location_ml:               row.location_ml ?? row.location,
+    description:               row.description,
+    act:                       row.act,
+    sections:                  row.sections,
+    occurrence_date:           row.occurrence_date,
+    occurrence_time:           row.occurrence_time,
+    complainant_name:          row.complainant_name,
+    accused_details:           row.accused_details,
+    crime_type_id:             row.crime_type_id,
+    police_station_id:         row.police_station_id,
+    investigating_officer_id:  row.investigating_officer_id,
+    created_at:                row.created_at,
+    updated_at:                row.updated_at,
+    // joined relations — same shape as mock data
+    police_stations: row.police_stations ?? null,
+    crime_types:     row.crime_types     ?? null,
+    officers:        row.officers        ?? null,
+  };
 }
 
-function generateFirNumber() {
-  const d = new Date();
-  const date = d.toISOString().slice(0, 10).replace(/-/g, "");
-  const rand = Math.floor(1000 + Math.random() * 9000);
-  return `FIR-${date}-${rand}`;
-}
-
+// ── GET ────────────────────────────────────────────────────────────────────────
 export async function GET(request: Request) {
+  const url = new URL(request.url);
+  const filters = {
+    id:         url.searchParams.get("id"),
+    crime_type: url.searchParams.get("crime_type"),
+    status:     url.searchParams.get("status"),
+    location:   url.searchParams.get("location"),
+    date_from:  url.searchParams.get("date_from"),
+    date_to:    url.searchParams.get("date_to"),
+  };
+
+  // ── Try Supabase first ───────────────────────────────────────────────────────
   try {
-    const url = new URL(request.url);
+    const rows = await getFirsFromDB(filters);
+    if (rows.length > 0) {
+      const firs = rows.map(shapeRow);
 
-    // Merge mock data + runtime (newly registered) FIRs, newest first
-    let firs: any[] = [...runtimeFirs, ...mockDashboardData.firs];
+      // Also surface crime types for public portal dropdowns
+      const crimeTypesMap = new Map<string, any>();
+      firs.forEach((f) => {
+        if (f.crime_types) crimeTypesMap.set(f.crime_types.id, f.crime_types);
+      });
 
-    // apply filters
-    const id = url.searchParams.get("id");
-    const crime_type = url.searchParams.get("crime_type");
-    const status = url.searchParams.get("status");
-    const location = url.searchParams.get("location");
-    const date_from = url.searchParams.get("date_from");
-    const date_to = url.searchParams.get("date_to");
-
-    if (id) firs = firs.filter((f) => f.id === id);
-    if (crime_type) firs = firs.filter((f) => f.crime_type_id === crime_type);
-    if (status) firs = firs.filter((f) => f.status === status);
-    if (location) firs = firs.filter((f) => f.location?.toLowerCase().includes(location.toLowerCase()));
-    if (date_from) firs = firs.filter((f) => f.date_filed >= date_from);
-    if (date_to) firs = firs.filter((f) => f.date_filed <= date_to);
-
-    return NextResponse.json({ firs });
-  } catch (err) {
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
-  }
-}
-
-export async function POST(request: Request) {
-  try {
-    // Auth: read the officer badge from the request header (set by the FIR form)
-    const badgeHeader = request.headers.get("x-officer-badge") || "";
-
-    // Look up officer from mock data by badge number (case-insensitive)
-    const officer = mockDashboardData.officers.find(
-      (o) => o.badge_number.replace("-", "").toUpperCase() === badgeHeader.replace("-", "").toUpperCase()
-    ) ?? mockDashboardData.officers[0]; // fallback to first officer
-
-    const station_id = officer.station_id;
-    const officer_id = officer.id;
-
-    const body = await request.json();
-
-    const FirPayloadSchema = z.object({
-      complainant_name: z.preprocess((v) => sanitizeString(v), z.string().min(1)),
-      guardian_name: z.preprocess((v) => sanitizeString(v), z.string().nullable().optional()),
-      gender: z.preprocess((v) => sanitizeString(v), z.enum(["Male", "Female", "Other"]).optional()),
-      age: z.preprocess((v) => toNullableNumber(v), z.number().int().nonnegative().nullable().optional()),
-      dob: z.preprocess((v) => sanitizeString(v), z.string().nullable().optional()),
-      address: z.preprocess((v) => sanitizeString(v), z.string().nullable().optional()),
-      phone: z.preprocess((v) => sanitizeString(v), z.string().nullable().optional()),
-      date_of_occurrence: z.preprocess((v) => sanitizeString(v), z.string().nullable().optional()),
-      time_of_occurrence: z.preprocess((v) => sanitizeString(v), z.string().nullable().optional()),
-      location: z.preprocess((v) => sanitizeString(v), z.string().min(1)),
-      crime_type_id: z.preprocess((v) => sanitizeString(v), z.string().min(1)),
-      ipc_sections: z.preprocess((v) => sanitizeString(v), z.string().nullable().optional()),
-      description: z.preprocess((v) => sanitizeString(v), z.string().min(1)),
-      accused: z
-        .preprocess((v) => (Array.isArray(v) ? v : []), z.array(z.object({ name: z.preprocess(sanitizeString, z.string().nullable().optional()), address: z.preprocess(sanitizeString, z.string().nullable().optional()), description: z.preprocess(sanitizeString, z.string().nullable().optional()) })))
-        .optional(),
-      property_items: z
-        .preprocess((v) => (Array.isArray(v) ? v : []), z.array(z.object({ item_name: z.preprocess(sanitizeString, z.string().min(1)), quantity: z.preprocess((q) => toNullableNumber(q) ?? 1, z.number().int().min(1).optional()), estimated_value: z.preprocess((n) => toNullableNumber(n), z.number().optional()) })))
-        .optional(),
-    });
-
-    const parsed = FirPayloadSchema.safeParse(body);
-    if (!parsed.success) {
-      // Flatten field errors for client-friendly format
-      const flattened = parsed.error.flatten();
-      const fieldErrors = flattened.fieldErrors || {};
-      return NextResponse.json({ error: "Validation failed", fieldErrors }, { status: 400 });
+      return NextResponse.json(
+        { firs, crimeTypes: Array.from(crimeTypesMap.values()) },
+        { headers: { "Cache-Control": "no-store" } }
+      );
     }
-
-    const {
-      complainant_name,
-      location,
-      crime_type_id,
-      description,
-    } = parsed.data;
-
-    const fir_number = generateFirNumber();
-    const date_filed = new Date().toISOString().slice(0, 10);
-    const time_filed = new Date().toTimeString().split(" ")[0];
-
-    // Use mock data to resolve relations (avoids Supabase foreign key issues with mock IDs like "ct-1")
-    const crimeType = mockDashboardData.crimeTypes.find((c) => c.id === crime_type_id) ?? null;
-    const station = mockDashboardData.stations.find((s) => s.id === station_id) ?? null;
-
-    const newFir = {
-      id: `fir-new-${Date.now()}`,
-      fir_number,
-      date_filed,
-      time_filed,
-      station_id,
-      crime_type_id,
-      investigating_officer_id: officer_id,
-      location,
-      location_ml: location,
-      description,
-      complainant_name,
-      status: "Registered",
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      police_stations: station,
-      crime_types: crimeType,
-      officers: officer,
-    };
-
-    // Persist in memory so GET /api/firs returns it for both portals
-    runtimeFirs.unshift(newFir);
-
-    return NextResponse.json({ ok: true, fir: newFir }, { status: 201 });
   } catch (err) {
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    console.warn("[/api/firs] Supabase error, falling back to mock:", err);
   }
+
+  // ── Fallback: mock data ──────────────────────────────────────────────────────
+  let firs: any[] = [...mockDashboardData.firs];
+  if (filters.id)         firs = firs.filter((f) => f.id === filters.id);
+  if (filters.crime_type) firs = firs.filter((f) => f.crime_type_id === filters.crime_type);
+  if (filters.status)     firs = firs.filter((f) => f.status === filters.status);
+  if (filters.location)   firs = firs.filter((f) => f.location?.toLowerCase().includes((filters.location ?? "").toLowerCase()));
+  if (filters.date_from)  firs = firs.filter((f) => f.date_filed >= (filters.date_from ?? ""));
+  if (filters.date_to)    firs = firs.filter((f) => f.date_filed <= (filters.date_to ?? ""));
+
+  return NextResponse.json({ firs, _source: "mock" });
 }

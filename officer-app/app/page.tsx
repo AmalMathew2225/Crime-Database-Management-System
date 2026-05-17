@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 
 const LOGIN_URL = "https://crime-database-management-system.vercel.app/login";
