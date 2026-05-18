@@ -18,32 +18,9 @@ export function Navbar() {
                     </div>
                 </Link>
 
-                <nav className="hidden md:flex items-center gap-6">
-                    <Link href="/dashboard" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
-                        Dashboard
-                    </Link>
-                    <Link href="/criminals" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
-                        Criminal DB
-                    </Link>
-                </nav>
-
-                {/* Tagline - Hidden on small screens if needed, or styled as badge */}
-                <div className="hidden sm:inline-block rounded-full bg-secondary px-3 py-1 text-xs font-medium text-muted-foreground">
-                    RTI Public Information System
-                </div>
-
-                {/* Right Actions */}
+                {/* Removed non-functional buttons as requested */}
                 <div className="flex items-center gap-4">
-                    <NotificationsDropdown />
-                    <PersonSearchModal />
-                    <Button variant="ghost" className="text-sm font-medium text-muted-foreground hover:text-primary gap-2">
-                        <UserCircle className="h-4 w-4" />
-                        Login
-                    </Button>
-                    <Button variant="ghost" className="text-sm font-medium text-muted-foreground hover:text-primary gap-2">
-                        <Globe className="h-4 w-4" />
-                        Malayalam
-                    </Button>
+                    {/* Empty for now, can add officer profile later */}
                 </div>
             </div>
 

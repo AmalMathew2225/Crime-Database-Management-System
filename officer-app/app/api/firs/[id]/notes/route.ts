@@ -1,13 +1,16 @@
 import { NextResponse, NextRequest } from "next/server";
 import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/server";
-import { verifyToken } from "@/lib/auth";
+import { getAuthenticatedOfficer } from "@/lib/session";
 
 // ── GET /api/firs/[id]/notes ───────────────────────────────────────────────────
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const officer = await getAuthenticatedOfficer(request);
+  if (!officer) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
   const { id } = await params;
   try {
     const supabase = createServiceClient();
@@ -34,10 +37,8 @@ export async function POST(
 ) {
   const { id } = await params;
 
-  // Resolve officer from JWT cookie
-  const token = request.cookies.get("auth_token")?.value ?? "";
-  const payload = token ? verifyToken(token) : null;
-  if (!payload) {
+  const officer = await getAuthenticatedOfficer(request);
+  if (!officer) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -50,18 +51,11 @@ export async function POST(
   try {
     const supabase = createServiceClient();
 
-    // Look up the officer row to get their UUID
-    const { data: officer } = await supabase
-      .from("officers")
-      .select("id, name, rank, badge_number")
-      .eq("uid", payload.uid)
-      .single();
-
     const { data, error } = await supabase
       .from("case_notes")
       .insert({
         fir_id:     id,
-        officer_id: officer?.id ?? null,
+        officer_id: officer.id,
         note:       parsed.data.note,
       })
       .select("*, officers(id, name, rank, badge_number)")
@@ -83,6 +77,9 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  const officer = await getAuthenticatedOfficer(request);
+  if (!officer) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
   const body = await request.json();
   const parsed = editSchema.safeParse(body);
   if (!parsed.success) {
@@ -113,6 +110,9 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  const officer = await getAuthenticatedOfficer(request);
+  if (!officer) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
   const body = await request.json();
   const noteId = body.id;
   if (!noteId) {

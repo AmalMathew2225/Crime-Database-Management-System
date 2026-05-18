@@ -35,12 +35,10 @@ export function EvidenceUploader({ firId, onUpload }: EvidenceUploaderProps) {
         reader.readAsDataURL(file);
       });
 
-      const badge = typeof window !== "undefined" ? localStorage.getItem("officer_badge") || "" : "";
       const res = await fetch(`/api/firs/${firId}/evidence`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-officer-badge": badge,
         },
         body: JSON.stringify({
           filename: file.name,

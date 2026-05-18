@@ -11,10 +11,6 @@ interface CaseNotesProps {
   firId: string;
 }
 
-function getBadge() {
-  return typeof window !== "undefined" ? localStorage.getItem("officer_badge") || "" : "";
-}
-
 export function CaseNotes({ firId }: CaseNotesProps) {
   const [notes, setNotes] = useState<CaseNote[]>([]);
   const [text, setText] = useState("");
@@ -37,14 +33,14 @@ export function CaseNotes({ firId }: CaseNotesProps) {
     if (editingId) {
       await fetch(`/api/firs/${firId}/notes`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', 'x-officer-badge': getBadge() },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: editingId, note: text }),
       });
       setEditingId(null);
     } else {
       await fetch(`/api/firs/${firId}/notes`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-officer-badge': getBadge() },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ note: text }),
       });
     }
@@ -60,7 +56,7 @@ export function CaseNotes({ firId }: CaseNotesProps) {
   async function remove(id: string) {
     await fetch(`/api/firs/${firId}/notes`, {
       method: 'DELETE',
-      headers: { 'Content-Type': 'application/json', 'x-officer-badge': getBadge() },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id }),
     });
     fetchNotes();

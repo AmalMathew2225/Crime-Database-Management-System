@@ -1,13 +1,16 @@
 import { NextResponse, NextRequest } from "next/server";
 import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/server";
-import { verifyToken } from "@/lib/auth";
+import { getAuthenticatedOfficer } from "@/lib/session";
 
 // ── GET /api/firs/[id]/evidence ───────────────────────────────────────────────
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const officer = await getAuthenticatedOfficer(request);
+  if (!officer) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
   const { id } = await params;
   try {
     const supabase = createServiceClient();
@@ -18,7 +21,14 @@ export async function GET(
       .order("created_at", { ascending: true });
 
     if (error) throw error;
-    return NextResponse.json({ evidence: data ?? [] });
+    return NextResponse.json({
+      evidence: (data ?? []).map((item: any) => ({
+        ...item,
+        filename: item.filename || "evidence-file",
+        dataUrl: item.url,
+        mimeType: item.mime_type,
+      })),
+    });
   } catch (err) {
     console.error("[GET evidence]", err);
     return NextResponse.json({ evidence: [] });
@@ -41,9 +51,8 @@ export async function POST(
 ) {
   const { id } = await params;
 
-  const token = request.cookies.get("auth_token")?.value ?? "";
-  const payload = token ? verifyToken(token) : null;
-  if (!payload) {
+  const officer = await getAuthenticatedOfficer(request);
+  if (!officer) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -56,12 +65,6 @@ export async function POST(
   try {
     const supabase = createServiceClient();
 
-    const { data: officer } = await supabase
-      .from("officers")
-      .select("id, name, rank, badge_number")
-      .eq("uid", payload.uid)
-      .single();
-
     // Use Storage URL if provided, otherwise fall back to dataUrl
     const url = parsed.data.url || parsed.data.dataUrl || "";
 
@@ -69,9 +72,11 @@ export async function POST(
       .from("evidence")
       .insert({
         fir_id:      id,
-        officer_id:  officer?.id ?? null,
+        officer_id:  officer.id,
+        filename:    parsed.data.filename,
         url,
         type:        parsed.data.type,
+        mime_type:   parsed.data.mimeType ?? null,
         description: parsed.data.description ?? null,
       })
       .select("*, officers(id, name, rank, badge_number)")
@@ -100,6 +105,9 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  const officer = await getAuthenticatedOfficer(request);
+  if (!officer) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
   const body = await request.json();
   const evidenceId = body.id;
   if (!evidenceId) {

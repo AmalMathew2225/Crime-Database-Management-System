@@ -28,10 +28,9 @@ export function StatusUpdater({ firId, initialStatus }: { firId: string; initial
         setSaving(true);
         setSaved(false);
         setStatus(newStatus);
-        const badge = typeof window !== "undefined" ? localStorage.getItem("officer_badge") || "" : "";
         await fetch(`/api/firs/${firId}`, {
             method: "PATCH",
-            headers: { "Content-Type": "application/json", "x-officer-badge": badge },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ status: newStatus }),
         });
         setSaving(false);

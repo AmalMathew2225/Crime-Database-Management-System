@@ -5,39 +5,27 @@ import { ArrowLeft, MapPin, Phone, User, Calendar } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { notFound } from "next/navigation";
+import { createServiceClient } from "@/lib/supabase/server";
 
 async function getPersonData(id: string) {
     try {
-        // Construct API URL for server-side fetch
-        // Use environment variable if available, otherwise default to localhost
-        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
-                       process.env.VERCEL_URL 
-                       ? `https://${process.env.VERCEL_URL}`
-                       : 'http://localhost:3000';
-        
-        const response = await fetch(`${baseUrl}/api/person/${id}`, {
-            cache: 'no-store', // Always fetch fresh data
-        });
-
-        if (!response.ok) {
-            if (response.status === 404) {
-                return null;
-            }
-            throw new Error(`API error: ${response.status}`);
-        }
-
-        const data = await response.json();
-        return data.person;
+        const { data, error } = await createServiceClient()
+            .from("persons")
+            .select("*, person_involvements(*, firs(id, fir_number, status, date_filed, location, description, police_stations(name), crime_types(name, ipc_section)))")
+            .eq("id", id)
+            .maybeSingle();
+        if (error) throw error;
+        if (!data) return null;
+        return {
+            ...data,
+            involvements: (data.person_involvements || []).map((inv: any) => ({
+                ...inv,
+                fir: inv.firs,
+            })),
+        };
     } catch (error) {
         console.error('Error fetching person from API:', error);
-        // Fallback to direct function call if API fails (useful during development)
-        try {
-            const { getPersonWithCases } = await import('@/lib/mock-data');
-            return getPersonWithCases(id);
-        } catch (fallbackError) {
-            console.error('Fallback also failed:', fallbackError);
-            return null;
-        }
+        return null;
     }
 }
 

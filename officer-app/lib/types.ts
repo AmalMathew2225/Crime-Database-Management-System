@@ -43,8 +43,6 @@ export interface FIR {
   status: 'Registered' | 'Under Investigation' | 'Charge Sheet Filed' | 'Court Proceedings' | 'Closed';
   created_at: string;
   updated_at: string;
-  latitude?: number;
-  longitude?: number;
   police_stations?: PoliceStation;
   crime_types?: CrimeType;
   officers?: Officer;
@@ -159,39 +157,4 @@ export interface DashboardStats {
   closedCases: number;
 }
 
-// ── Criminal Database ─────────────────────────────────────────────────────────
-export type ThreatLevel = 'Low' | 'Medium' | 'High' | 'Extreme';
 
-export interface Criminal {
-  id: string;
-  aadhar_number: string;
-  name: string;
-  alias?: string;
-  age?: number;
-  gender?: string;
-  address?: string;
-  phone?: string;
-  photo_url?: string;
-  threat_level: ThreatLevel;
-  is_absconding: boolean;
-  is_convicted: boolean;
-  known_associates?: string[];
-  notes?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface CriminalFirLink {
-  id: string;
-  criminal_aadhar: string;
-  fir_id: string;
-  involvement_type: 'Accused' | 'Suspect' | 'Witness' | 'Convicted';
-  details?: string;
-  created_at: string;
-  fir?: FIRWithRelations;
-  criminal?: Criminal;
-}
-
-export interface CriminalWithCases extends Criminal {
-  criminal_fir_links: CriminalFirLink[];
-}

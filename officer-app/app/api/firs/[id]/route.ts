@@ -1,13 +1,15 @@
 import { NextResponse, NextRequest } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
-import { mockDashboardData } from "@/lib/mock-data";
 import { z } from "zod";
+import { getAuthenticatedOfficer } from "@/lib/session";
 
 const FIR_SELECT = `
   *,
-  police_stations ( id, name, district, code ),
-  crime_types     ( id, name, ipc_section ),
-  officers        ( id, name, rank, badge_number )
+  police_stations ( id, name, district, code, phone, email, address ),
+  crime_types     ( id, name, ipc_section, description ),
+  officers        ( id, name, rank, badge_number ),
+  accused         ( * ),
+  property_items  ( * )
 `;
 
 function shapeRow(row: any) {
@@ -15,6 +17,7 @@ function shapeRow(row: any) {
     id:                        row.id,
     fir_number:                row.fir_number,
     date_filed:                row.date_filed,
+    time_filed:                row.time_filed,
     status:                    row.status,
     location:                  row.location,
     location_ml:               row.location_ml ?? row.location,
@@ -24,6 +27,12 @@ function shapeRow(row: any) {
     occurrence_date:           row.occurrence_date,
     occurrence_time:           row.occurrence_time,
     complainant_name:          row.complainant_name,
+    guardian_name:             row.guardian_name,
+    gender:                    row.gender,
+    age:                       row.age,
+    dob:                       row.dob,
+    address:                   row.address,
+    phone:                     row.phone,
     accused_details:           row.accused_details,
     crime_type_id:             row.crime_type_id,
     police_station_id:         row.police_station_id,
@@ -33,7 +42,8 @@ function shapeRow(row: any) {
     police_stations:           row.police_stations ?? null,
     crime_types:               row.crime_types     ?? null,
     officers:                  row.officers        ?? null,
-    // extended fields for case detail page
+    accused:                   row.accused         ?? [],
+    property_items:            row.property_items  ?? [],
     case_notes:                row.case_notes      ?? [],
     evidence:                  row.evidence        ?? [],
   };
@@ -46,7 +56,6 @@ export async function GET(
 ) {
   const { id } = await params;
 
-  // ── Try Supabase ─────────────────────────────────────────────────────────────
   try {
     const supabase = createServiceClient();
     const { data, error } = await supabase
@@ -59,13 +68,11 @@ export async function GET(
       return NextResponse.json({ fir: shapeRow(data) });
     }
   } catch (err) {
-    console.warn(`[/api/firs/${id}] Supabase error, trying mock:`, err);
+    console.error(`[/api/firs/${id}] Supabase error:`, err);
+    return NextResponse.json({ error: "Failed to load case" }, { status: 500 });
   }
 
-  // ── Fallback: mock data ───────────────────────────────────────────────────────
-  const fir = mockDashboardData.firs.find((f: any) => f.id === id) ?? null;
-  if (!fir) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  return NextResponse.json({ fir });
+  return NextResponse.json({ error: "Not found" }, { status: 404 });
 }
 
 // ── PATCH /api/firs/[id] ──────────────────────────────────────────────────────
@@ -74,6 +81,10 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  const officer = await getAuthenticatedOfficer(request);
+  if (!officer) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   const updateSchema = z.object({
     status:      z.string().optional(),
@@ -87,7 +98,6 @@ export async function PATCH(
     return NextResponse.json({ error: "Invalid data" }, { status: 400 });
   }
 
-  // ── Try Supabase first ────────────────────────────────────────────────────────
   try {
     const supabase = createServiceClient();
 
@@ -114,10 +124,5 @@ export async function PATCH(
     return NextResponse.json({ error: "Failed to update case" }, { status: 500 });
   }
 
-  // ── FIR not in Supabase — it's a mock entry ───────────────────────────────────
-  const mockFir = mockDashboardData.firs.find((f: any) => f.id === id);
-  if (!mockFir) return NextResponse.json({ error: "Not found" }, { status: 404 });
-
-  const updated = { ...mockFir, ...parsed.data, updated_at: new Date().toISOString() };
-  return NextResponse.json({ fir: updated, _source: "mock" });
+  return NextResponse.json({ error: "Not found" }, { status: 404 });
 }

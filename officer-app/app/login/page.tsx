@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 
 export default function OfficerLoginPage() {
   const [badge, setBadge] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -21,17 +22,23 @@ export default function OfficerLoginPage() {
       setError("Invalid badge number. Use 4–12 letters, numbers, or hyphens (e.g. B1234 or KP-2341).");
       return;
     }
+    if (!password) {
+      setError("Please enter your password.");
+      return;
+    }
 
     setLoading(true);
     try {
-      const res = await fetch("/api/auth/me", {
-        headers: { "x-officer-badge": trimmed },
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ uid: trimmed, password }),
       });
       if (!res.ok) {
-        setError("Badge not recognised. Please check your badge number or contact your station administrator.");
+        const json = await res.json().catch(() => null);
+        setError(json?.error || "Invalid credentials.");
         return;
       }
-      localStorage.setItem("officer_badge", trimmed);
       router.replace("/dashboard");
     } catch {
       setError("Unable to connect to the server. Please try again.");
@@ -150,7 +157,7 @@ export default function OfficerLoginPage() {
             <div style={{ marginBottom: 32 }}>
               <h2 style={{ fontSize: 24, fontWeight: 600, color: "white", marginBottom: 8 }}>Officer Verification</h2>
               <p style={{ fontSize: 14, color: "rgba(121, 157, 214, 0.8)", lineHeight: "20px" }}>
-                Enter your Identity Badge Number to access the officer dashboard.
+                Enter your badge number and password to access the officer dashboard.
               </p>
             </div>
 
@@ -191,6 +198,27 @@ export default function OfficerLoginPage() {
                 <p style={{ fontSize: 11, color: "rgba(121, 157, 214, 0.6)", letterSpacing: "0.03em" }}>
                   Format: Alphanumeric, 4–12 characters (e.g., KP1001 or KP1234567)
                 </p>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <label htmlFor="password" style={{ fontSize: 14, fontWeight: 600, color: "#ffe088", letterSpacing: "0.01em" }}>
+                  Password
+                </label>
+                <div style={{ position: "relative" }}>
+                  <div style={{ position: "absolute", top: 0, left: 0, bottom: 0, paddingLeft: 16, display: "flex", alignItems: "center", pointerEvents: "none" }}>
+                    <span className="material-symbols-outlined" style={{ color: "#799dd6", fontSize: 22 }}>lock</span>
+                  </div>
+                  <input
+                    className="login-input"
+                    id="password"
+                    name="password"
+                    type="password"
+                    autoComplete="current-password"
+                    placeholder="Enter password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </div>
               </div>
 
               <button type="submit" disabled={loading} className="login-btn">

@@ -223,8 +223,35 @@ export function FIRTable({ firs, stations, crimeTypes }: FIRTableProps) {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Button variant="ghost" size="sm" asChild>
-                        <Link href={`/case/${fir.id}`}>View</Link>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-1.5 text-primary border-primary/30 hover:bg-primary/5"
+                        onClick={() => {
+                          const w = window.open("", "_blank");
+                          if (!w) return;
+                          const date = new Date(fir.date_filed).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" });
+                          w.document.write(`<!DOCTYPE html><html><head><title>FIR ${fir.fir_number}</title>
+                          <style>body{font-family:Arial,sans-serif;padding:40px;max-width:700px;margin:auto}h1{color:#001e40;font-size:22px;border-bottom:2px solid #001e40;padding-bottom:8px}table{width:100%;border-collapse:collapse;margin-top:16px}td{padding:8px 12px;border:1px solid #ddd;font-size:14px}td:first-child{font-weight:bold;background:#f5f8ff;width:35%}.status{display:inline-block;padding:4px 10px;border-radius:4px;font-size:12px;font-weight:bold;background:#fef3c7;color:#92400e}.header{text-align:center;margin-bottom:24px}.seal{font-size:40px;margin-bottom:8px}@media print{body{padding:20px}}</style>
+                          </head><body>
+                          <div class="header"><div class="seal">🛡️</div><h2>THUNA — Crime Transparency Portal</h2><p style="color:#64748b;font-size:13px">Official FIR Information Document</p></div>
+                          <h1>FIR No: ${fir.fir_number}</h1>
+                          <table>
+                            <tr><td>Date Filed</td><td>${date}</td></tr>
+                            <tr><td>Police Station</td><td>${fir.police_stations?.name || "—"}</td></tr>
+                            <tr><td>District</td><td>${fir.police_stations?.district || "—"}</td></tr>
+                            <tr><td>Crime Type</td><td>${fir.crime_types?.name || "—"}</td></tr>
+                            <tr><td>IPC Section</td><td>${fir.crime_types?.ipc_section || "—"}</td></tr>
+                            <tr><td>Location</td><td>${fir.location}</td></tr>
+                            <tr><td>Status</td><td><span class="status">${fir.status}</span></td></tr>
+                          </table>
+                          <p style="margin-top:32px;font-size:11px;color:#94a3b8;text-align:center">This is a computer-generated document from the THUNA Crime Transparency Portal. For official use, contact the respective Police Station.</p>
+                          <script>window.onload=()=>{window.print();}</script>
+                          </body></html>`);
+                          w.document.close();
+                        }}
+                      >
+                        ⬇ Download PDF
                       </Button>
                     </TableCell>
                   </TableRow>
