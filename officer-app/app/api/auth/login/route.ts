@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { parse } from "cookie";
 import { serialize } from "cookie";
-import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import { verifyPassword, signToken } from "@/lib/auth";
 
 export async function POST(request: Request) {
@@ -13,7 +13,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing credentials" }, { status: 400 });
     }
 
-    const supabase = await createClient();
+    const supabase = createServiceClient();
     const { data: officer, error } = await supabase
       .from("officers")
       .select("id, name, rank, badge_number, station_id, uid, role, password_hash")
@@ -40,7 +40,16 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json(
-      { ok: true, officer: { id: officer.id, name: officer.name, station_id: officer.station_id, role: officer.role } },
+      {
+        ok: true,
+        officer: {
+          id: officer.id,
+          name: officer.name,
+          badge_number: officer.badge_number,
+          station_id: officer.station_id,
+          role: officer.role,
+        },
+      },
       { status: 200, headers: { "Set-Cookie": cookie } }
     );
   } catch (err) {

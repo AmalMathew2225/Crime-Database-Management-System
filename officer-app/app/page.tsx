@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-const LOGIN_URL = "https://crime-database-management-system.vercel.app/login";
+const LOGIN_URL = "/login";
 
 // Color constants from the design system reference
 const C = {
@@ -25,7 +25,7 @@ export default function HomePage() {
   return (
     <div
       className="min-h-screen flex flex-col"
-      style={{ background: "#f9f9ff", color: C.onSurface, fontFamily: "Inter, sans-serif" }}
+      style={{ background: "#f9f9ff", color: C.onSurface }}
     >
 
       {/* ── Top Nav ── */}
@@ -40,7 +40,7 @@ export default function HomePage() {
             className="h-10 w-10 object-contain"
             src="https://lh3.googleusercontent.com/aida/ADBb0ugaXps9Q2RB5JyTNAQmEK3Uv2VauFOi7MCAoRHg9cZ8_wTlHjeerduV5lQ_xkmSm_gSdUevuLs1bt7vgQit1YuQjRuBQrAYOzGBE0gedAQg54XDp6gumlUwqqR2p2xtLxLM2SDL8tzRF6ddVR2w3AcGAq8OT2ffq53vbOLICwbG2PHZrg5EzyLHBcIDPULRauHApkzzjdGOknA38mF11JKpbQPknMcLJy0lFcCTVubqUm_2-2hApF7YeS0"
           />
-          <span className="text-2xl font-bold" style={{ color: C.secFixed }}>THUNA CDMS</span>
+          <span className="text-lg sm:text-xl font-bold tracking-tight" style={{ color: C.secFixed }}>THUNA CDMS</span>
         </div>
 
         {/* Center nav */}
@@ -85,14 +85,14 @@ export default function HomePage() {
             style={{ background: C.secContainer, color: C.secContainerFg }}
           >
             <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified_user</span>
-            <span className="text-[11px] font-medium tracking-widest uppercase">Secure Gateway Access</span>
+            <span className="text-xs font-medium tracking-widest uppercase">Secure Gateway Access</span>
           </div>
 
-          <h1 className="text-[32px] font-bold leading-[40px] mb-4" style={{ color: C.primary, letterSpacing: "-0.02em" }}>
+          <h1 className="text-3xl sm:text-4xl font-bold leading-tight mb-4" style={{ color: C.primary, letterSpacing: "-0.02em" }}>
             Officer Command Center
           </h1>
 
-          <p className="text-base leading-6 max-w-2xl mx-auto" style={{ color: C.onSurfVar }}>
+          <p className="text-sm sm:text-base leading-relaxed max-w-2xl mx-auto" style={{ color: C.onSurfVar }}>
             Welcome to the THUNA Intelligence Network. Please confirm your department to proceed to secure verification.
           </p>
 
@@ -306,8 +306,8 @@ function DeptCard({ href, icon, title, desc }: {
         >
           <span className="material-symbols-outlined" style={{ color: C_local.secFixed }}>{icon}</span>
         </div>
-        <h3 className="font-semibold text-xl mb-2" style={{ color: C_local.primary }}>{title}</h3>
-        <p className="text-sm" style={{ color: C_local.onSurfVar }}>{desc}</p>
+        <h3 className="font-semibold text-lg sm:text-xl mb-2" style={{ color: C_local.primary }}>{title}</h3>
+        <p className="text-sm leading-relaxed" style={{ color: C_local.onSurfVar }}>{desc}</p>
       </div>
     </a>
   );

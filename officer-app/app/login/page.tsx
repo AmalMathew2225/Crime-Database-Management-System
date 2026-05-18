@@ -17,8 +17,8 @@ export default function OfficerLoginPage() {
       setError("Please enter your Identity Badge Number.");
       return;
     }
-    if (!/^[A-Z0-9]{4,12}$/.test(trimmed)) {
-      setError("Invalid badge number. Must be 4–12 alphanumeric characters.");
+    if (!/^[A-Z0-9-]{4,12}$/.test(trimmed)) {
+      setError("Invalid badge number. Use 4–12 letters, numbers, or hyphens (e.g. B1234 or KP-2341).");
       return;
     }
 
