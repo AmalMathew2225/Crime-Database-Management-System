@@ -19,8 +19,11 @@ export function Navbar() {
                 </Link>
 
                 <nav className="hidden md:flex items-center gap-6">
+                    <Link href="/dashboard" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+                        Dashboard
+                    </Link>
                     <Link href="/criminals" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
-                        Criminal Database
+                        Criminal DB
                     </Link>
                 </nav>
 
